@@ -6,10 +6,6 @@ const clientWhatsApp = new Client({
   puppeteer: {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   },
-  webVersionCache: {
-    type: 'remote',
-    remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1014631230-alpha.html`,
-  },
 });
 
 clientWhatsApp.on('qr', (qr) => {

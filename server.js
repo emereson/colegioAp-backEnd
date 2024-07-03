@@ -4,7 +4,7 @@ const { db } = require('./database/config');
 const initModel = require('./models/initModels');
 const { clientWhatsApp } = require('./utils/whatsapp');
 
-// clientWhatsApp.initialize();
+clientWhatsApp.initialize();
 
 db.authenticate()
   .then(() => console.log('Database Authenticated! ✔'))
