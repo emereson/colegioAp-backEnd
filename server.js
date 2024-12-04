@@ -2,9 +2,6 @@ require('dotenv').config();
 const app = require('./app');
 const { db } = require('./database/config');
 const initModel = require('./models/initModels');
-const { clientWhatsApp } = require('./utils/whatsapp');
-
-// clientWhatsApp.initialize()ww;
 
 db.authenticate()
   .then(() => console.log('Database Authenticated! ✔'))
