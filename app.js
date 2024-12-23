@@ -22,6 +22,7 @@ const notificationsRouter = require('./routes/notifications.routes');
 const calendarRouter = require('./routes/calendar.routes');
 const galeryPhotosRouter = require('./routes/galeryPhotos.routes');
 const accessStudentRouter = require('./routes/accessStudent.routes');
+const vincularWspRouter = require('./routes/vincularWsp');
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use('/api/v1/notifications', notificationsRouter);
 app.use('/api/v1/calendar', calendarRouter);
 app.use('/api/v1/galeryPhotos', galeryPhotosRouter);
 app.use('/api/v1/accessStudent', accessStudentRouter);
+app.use('/api/v1/vincular-wsp', vincularWspRouter);
 
 app.all('*', (req, res, next) => {
   return next(

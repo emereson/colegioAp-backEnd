@@ -1,20 +1,15 @@
-// const { Client, NoAuth } = require('whatsapp-web.js');
-// const puppeteer = require('puppeteer');
+const pkg = require('whatsapp-web.js'); // Importa el módulo completo
+const puppeteer = require('puppeteer');
 
-// const clientWhatsApp = new Client({
-//   authStrategy: new NoAuth(),
-//   puppeteer: {
-//     executablePath: puppeteer.executablePath(), // Usar el ejecutable integrado
-//     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-//   },
-// });
+// Extrae Client y NoAuth desde el objeto importado
+const { Client, NoAuth } = pkg;
 
-// clientWhatsApp.on('qr', (qr) => {
-//   console.log(qr);
-// });
+const clientWhatsApp = new Client({
+  authStrategy: new NoAuth(),
+  puppeteer: {
+    executablePath: puppeteer.executablePath(),
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  },
+});
 
-// clientWhatsApp.on('ready', () => {
-//   console.log('Client is ready!');
-// });
-
-// module.exports = { clientWhatsApp };
+module.exports = clientWhatsApp;

@@ -29,6 +29,9 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.33.0",
     "xss": "^1.0.14",
-    "xss-clean": "^0.1.4"
+    "xss-clean": "^0.1.4",
+    "puppeteer": "^23.6.1",
+    "qrcode": "^1.5.4",
+    "whatsapp-web.js": "^1.26.0"
   }
 }
