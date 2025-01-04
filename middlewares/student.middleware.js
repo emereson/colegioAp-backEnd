@@ -45,6 +45,35 @@ exports.validExistStudent = catchAsync(async (req, res, next) => {
   next();
 });
 
+exports.validExistStudent2 = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  const student = await Student.findOne({
+    where: {
+      id,
+    },
+    include: [
+      {
+        model: Classroom,
+      },
+      {
+        model: Observations,
+      },
+      {
+        model: Debts,
+      },
+    ],
+  });
+  if (!student) {
+    return next(new AppError(`data of the student not found`, 404));
+  }
+  req.student = student;
+  req.Classroom = student.Classroom;
+  req.Observations = student.Observations;
+  req.Debts = student.Debts;
+  next();
+});
+
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
   if (

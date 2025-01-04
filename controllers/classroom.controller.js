@@ -37,29 +37,6 @@ exports.findAllStudent = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllStudent = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const classroom = await Classroom.findAll({
-    where: {
-      studentId: id,
-    },
-
-    include: [
-      { model: Course },
-      {
-        model: Payments,
-      },
-      { model: Student },
-    ],
-  });
-
-  return res.status(200).json({
-    status: 'success',
-    message: 'All classroom successfully',
-    classroom,
-  });
-});
-
 exports.create = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { name, tutor } = req.body;
