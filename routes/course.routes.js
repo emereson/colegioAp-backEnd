@@ -7,10 +7,9 @@ const classroomMiddleware = require('../middlewares/classroom.middleware');
 const courseController = require('../controllers/course.controller');
 
 const router = express.Router();
+router.get('/', courseController.findAll);
 
 router.use(authMiddleware.protect);
-
-router.get('/', courseController.findAll);
 
 router
   .route('/:id')

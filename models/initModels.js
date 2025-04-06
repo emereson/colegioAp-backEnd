@@ -17,8 +17,14 @@ const initModel = () => {
   Student.hasMany(Classroom, { foreignKey: 'student_id' });
   Classroom.belongsTo(Student, { foreignKey: 'student_id' });
 
+  Student.hasMany(Classroom, { foreignKey: 'student_id' });
+  Classroom.belongsTo(Student, { foreignKey: 'student_id' });
+
   Student.hasMany(ClassroomsStudent, { foreignKey: 'student_id' });
   ClassroomsStudent.belongsTo(Student, { foreignKey: 'student_id' });
+
+  ClassroomsStudent.hasMany(Course, { foreignKey: 'classroom_student_id' });
+  Course.belongsTo(ClassroomsStudent, { foreignKey: 'classroom_student_id' });
 
   Classroom.hasMany(ClassroomsStudent, { foreignKey: 'classroom_id' });
   ClassroomsStudent.belongsTo(Classroom, { foreignKey: 'classroom_id' });

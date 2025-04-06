@@ -40,28 +40,6 @@ exports.findAll = catchAsync(async (req, res, next) => {
     shouldLimit = false;
   }
 
-  console.log(whereFilter);
-
-  // const studentsIds = await db.query(
-  //   `
-  //   SELECT students.id
-  //   FROM public.classrooms AS classrooms
-  //   LEFT JOIN public.students AS students
-  //   ON classrooms.student_id = students.id
-  //   WHERE classrooms.name = '5TO PRIMARIA 2025'
-  //   ORDER BY classrooms.id ASC;
-  // `,
-  //   { type: db.QueryTypes.SELECT }
-  // );
-
-  // for (const student of studentsIds) {
-  //   const classroomsStudent = await ClassroomsStudent.create({
-  //     student_id: student.id,
-  //     classroom_id: 139,
-  //   });
-  //   console.log(classroomsStudent);
-  // }
-
   const students = await Student.findAll({
     where: whereFilter, // Aplicamos el filtro de búsqueda
     include: [
