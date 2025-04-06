@@ -2,7 +2,7 @@ const catchAsync = require('../utils/catchAsync');
 const Debts = require('../models/debts.model');
 const { clientWhatsApp } = require('../utils/whatsapp');
 
-exports.findAll = catchAsync(async (req, res, next) => {
+exports.findAllStudentId = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const debts = await Debts.findAll({
     where: {

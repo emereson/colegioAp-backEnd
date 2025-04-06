@@ -10,6 +10,7 @@ const Payments = require('../models/payments.model');
 const Attendance = require('../models/attendance.model');
 const Observations = require('../models/observations.model');
 const Debts = require('../models/debts.model');
+const ClassroomsStudent = require('../models/classroomsStudents.model');
 
 exports.validExistStudent = catchAsync(async (req, res, next) => {
   const { id } = req.params;
@@ -18,14 +19,30 @@ exports.validExistStudent = catchAsync(async (req, res, next) => {
     where: {
       id,
     },
+  });
+
+  if (!student) {
+    return next(new AppError(`data of the student not found`, 404));
+  }
+  req.student = student;
+  next();
+});
+
+exports.validExistStudentIncluide = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  const student = await Student.findOne({
+    where: {
+      id,
+    },
     include: [
       {
-        model: Classroom,
-        include: [
-          { model: Course, include: { model: Exam } },
-          { model: Payments },
-          { model: Attendance },
-        ],
+        model: ClassroomsStudent,
+        // include: [
+        //   { model: Course, include: { model: Exam } },
+        //   { model: Payments },
+        //   { model: Attendance },
+        // ],
       },
       {
         model: Observations,

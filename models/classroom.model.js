@@ -8,9 +8,9 @@ const Classroom = db.define('classroom', {
     allowNull: false,
     type: DataTypes.INTEGER,
   },
-  studentId: {
+  student_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
   },
   name: {
     type: DataTypes.STRING,
@@ -19,6 +19,10 @@ const Classroom = db.define('classroom', {
   tutor: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  year: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
 });
 

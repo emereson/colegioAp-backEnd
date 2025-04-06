@@ -10,7 +10,11 @@ const router = express.Router();
 
 router.use(authMiddleware.protect);
 
-router.get('/', debtsController.findAll);
+router.get(
+  '/student/:id',
+  studentMiddleware.validExistStudent,
+  debtsController.findAllStudentId
+);
 
 router
   .route('/:id')

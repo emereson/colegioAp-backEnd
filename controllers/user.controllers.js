@@ -55,12 +55,13 @@ exports.login = catchAsync(async (req, res, next) => {
       dni,
     },
   });
+
   if (!user) {
-    return next(new AppError('the user could not be found', 404));
+    return next(new AppError('El dni no se encuentra registrado', 404));
   }
 
   if (!(await bcrypt.compare(password, user.password))) {
-    return next(new AppError('Incorrect email or password', 401));
+    return next(new AppError('Contraseña incorrecta', 401));
   }
 
   const token = await generateJWT(user.id);
@@ -68,7 +69,6 @@ exports.login = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
     token,
-    user,
   });
 });
 exports.update = catchAsync(async (req, res) => {

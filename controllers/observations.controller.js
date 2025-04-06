@@ -2,8 +2,14 @@ const catchAsync = require('../utils/catchAsync');
 const Observations = require('../models/observations.model');
 const { clientWhatsApp } = require('../utils/whatsapp');
 
-exports.findAll = catchAsync(async (req, res, next) => {
-  const observations = await Observations.findAll({});
+exports.findAllStudentId = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  const observations = await Observations.findAll({
+    where: {
+      studentId: id,
+    },
+  });
 
   return res.status(200).json({
     status: 'success',

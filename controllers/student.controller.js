@@ -13,27 +13,71 @@ const { Op } = require('sequelize');
 const Payments = require('../models/payments.model');
 const Observations = require('../models/observations.model');
 const Debts = require('../models/debts.model');
+const { db } = require('../database/config');
+const ClassroomsStudent = require('../models/classroomsStudents.model');
 
 exports.findAll = catchAsync(async (req, res, next) => {
-  const { search } = req.query;
+  const { name, aula } = req.query; // Aquí es donde recibimos el parámetro de búsqueda
+
+  let whereFilter = {};
+  let whereClassroom = {};
+  let shouldLimit = true;
+
+  if (aula && aula !== 'undefined' && aula.length > 0) {
+    whereClassroom.classroom_id = aula;
+    shouldLimit = false;
+  }
+
+  if (name && name !== 'undefined' && name.length > 3) {
+    whereFilter = {
+      [Op.or]: [
+        { lastName: { [Op.iLike]: `%${name}%` } }, // Búsqueda insensible a mayúsculas y minúsculas para el apellido
+        { name: { [Op.iLike]: `%${name}%` } }, // Búsqueda insensible a mayúsculas y minúsculas para el nombre
+        { dni: { [Op.like]: `%${name}%` } }, // Búsqueda con LIKE para el DNI
+        { phoneNumber: { [Op.like]: `%${name}%` } }, // Búsqueda con LIKE para el DNI
+      ],
+    };
+    shouldLimit = false;
+  }
+
+  console.log(whereFilter);
+
+  // const studentsIds = await db.query(
+  //   `
+  //   SELECT students.id
+  //   FROM public.classrooms AS classrooms
+  //   LEFT JOIN public.students AS students
+  //   ON classrooms.student_id = students.id
+  //   WHERE classrooms.name = '5TO PRIMARIA 2025'
+  //   ORDER BY classrooms.id ASC;
+  // `,
+  //   { type: db.QueryTypes.SELECT }
+  // );
+
+  // for (const student of studentsIds) {
+  //   const classroomsStudent = await ClassroomsStudent.create({
+  //     student_id: student.id,
+  //     classroom_id: 139,
+  //   });
+  //   console.log(classroomsStudent);
+  // }
 
   const students = await Student.findAll({
-    where: {
-      [Op.or]: [
-        { lastName: { [Op.iLike]: `%${search}%` } }, // Búsqueda insensible a mayúsculas y minúsculas para el apellido
-        { name: { [Op.iLike]: `%${search}%` } }, // Búsqueda insensible a mayúsculas y minúsculas para el nombre
-        { dni: { [Op.like]: `%${search}%` } },
-      ],
-    },
-    include: [{ model: Classroom }],
+    where: whereFilter, // Aplicamos el filtro de búsqueda
+    include: [
+      { model: ClassroomsStudent, where: whereClassroom, required: false },
+    ],
+    order: [['createdAt', 'DESC']],
+    ...(shouldLimit && { limit: 10 }), // Incluimos la relación con la tabla Classroom
   });
 
   return res.status(200).json({
     status: 'Success',
-    results: students.length,
-    students,
+    results: students.length, // Número de resultados encontrados
+    students, // Los estudiantes encontrados
   });
 });
+
 exports.findAllLastName = catchAsync(async (req, res, next) => {
   const { search } = req.query;
 
@@ -81,6 +125,7 @@ exports.findAllClasroom = catchAsync(async (req, res, next) => {
     students,
   });
 });
+
 exports.findAllClasroomAttendance = catchAsync(async (req, res, next) => {
   const { name, date } = req.query;
 
@@ -165,6 +210,7 @@ exports.findAllClassroomExamName = catchAsync(async (req, res, next) => {
     students,
   });
 });
+
 exports.findAllClasroomStudent = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
@@ -184,18 +230,51 @@ exports.findAllClasroomStudent = catchAsync(async (req, res, next) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const { name, lastName, dni, phoneNumber, password } = req.body;
 
-  const salt = await bcrypt.genSalt(12);
-  const encryptedPassword = await bcrypt.hash(password, salt);
+  // Verificar existencia de dni y phoneNumber en paralelo
+  const [existingDni, existingPhone] = await Promise.all([
+    Student.findOne({ where: { dni } }),
+    Student.findOne({ where: { phoneNumber } }),
+  ]);
 
-  const imgRef = ref(
-    storage,
-    `studentImg/${Date.now()}-${req.file.originalname}`
-  );
+  // Validaciones de datos existentes
+  if (existingDni) {
+    return next(new AppError(`El DNI ${dni} ya está registrado.`, 409));
+  }
 
-  await uploadBytes(imgRef, req.file.buffer);
+  if (existingPhone) {
+    return next(
+      new AppError(
+        `El número de teléfono ${phoneNumber} ya está registrado.`,
+        409
+      )
+    );
+  }
 
-  const imgUploaded = await getDownloadURL(imgRef);
+  // Encriptar contraseña y subir imagen en paralelo
+  const [encryptedPassword, imgUploaded] = await Promise.all([
+    // Encriptar contraseña
+    (async () => {
+      const salt = await bcrypt.genSalt(12);
+      return bcrypt.hash(password, salt);
+    })(),
 
+    // Subir imagen
+    (async () => {
+      if (!req.file) {
+        return null; // O una imagen por defecto
+      }
+
+      const imgRef = ref(
+        storage,
+        `studentImg/${Date.now()}-${req.file.originalname}`
+      );
+
+      await uploadBytes(imgRef, req.file.buffer);
+      return getDownloadURL(imgRef);
+    })(),
+  ]);
+
+  // Crear estudiante
   const student = await Student.create({
     name,
     lastName,
@@ -205,16 +284,22 @@ exports.signup = catchAsync(async (req, res, next) => {
     studentImg: imgUploaded,
   });
 
-  const token = await generateJWT(student.id);
+  // Generar token
 
+  // Responder
   res.status(201).json({
     status: 'success',
-    message: 'the student has ben created successfully!',
-    token,
-    student,
+    message: 'El estudiante ha sido creado exitosamente!',
+    student: {
+      id: student.id,
+      name: student.name,
+      lastName: student.lastName,
+      dni: student.dni,
+      phoneNumber: student.phoneNumber,
+      studentImg: student.studentImg,
+    },
   });
 });
-
 exports.login = catchAsync(async (req, res, next) => {
   const { dni, password } = req.body;
 
@@ -249,10 +334,27 @@ exports.findOne = catchAsync(async (req, res, next) => {
     student,
   });
 });
+
 exports.update = catchAsync(async (req, res) => {
   const { student } = req;
-  const { name, lastName, dni, status, phoneNumber } = req.body;
+  const { name, lastName, dni, status, phoneNumber, password } = req.body;
 
+  // Preparar el objeto de actualización
+  const updateData = {
+    name,
+    lastName,
+    dni,
+    status,
+    phoneNumber,
+  };
+
+  // Procesar la contraseña si se proporciona una válida
+  if (password && password !== 'undefined' && password.length > 3) {
+    const salt = await bcrypt.genSalt(12);
+    updateData.password = await bcrypt.hash(password, salt);
+  }
+
+  // Procesar imagen si existe
   if (req.file) {
     const imgRef = ref(
       storage,
@@ -260,31 +362,19 @@ exports.update = catchAsync(async (req, res) => {
     );
 
     await uploadBytes(imgRef, req.file.buffer);
-
-    const imgUploaded = await getDownloadURL(imgRef);
-
-    await student.update({
-      name,
-      lastName,
-      dni,
-      status,
-      phoneNumber,
-      studentImg: imgUploaded,
-    });
-  } else {
-    await student.update({
-      name,
-      lastName,
-      dni,
-      status,
-      phoneNumber,
-    });
+    updateData.studentImg = await getDownloadURL(imgRef);
   }
 
-  res.status(201).json({
+  // Actualizar estudiante con todos los datos en una sola operación
+  await student.update(updateData);
+
+  // Obtener los datos actualizados
+  const updatedStudent = await student.reload();
+
+  res.status(200).json({
     status: 'success',
-    message: 'The student has been updated successfully!',
-    student,
+    message: 'El estudiante ha sido actualizado exitosamente!',
+    student: updatedStudent,
   });
 });
 

@@ -11,6 +11,7 @@ const xss = require('xss-clean');
 
 const usersRouter = require('./routes/users.routes');
 const classroomRouter = require('./routes/classroom.routes');
+const classroomsStudentRouter = require('./routes/classroomsStudent.routes');
 const courseRouter = require('./routes/course.routes');
 const examRouter = require('./routes/exam.routes');
 const studentRouter = require('./routes/student.routes');
@@ -50,6 +51,8 @@ app.use(hpp());
 app.use('/api/v1', limiter);
 app.use('/api/v1/user', usersRouter);
 app.use('/api/v1/classroom', classroomRouter);
+app.use('/api/v1/classrooms-student', classroomsStudentRouter);
+
 app.use('/api/v1/course', courseRouter);
 app.use('/api/v1/exam', examRouter);
 app.use('/api/v1/student', studentRouter);

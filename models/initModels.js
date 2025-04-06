@@ -1,5 +1,6 @@
 const Attendance = require('./attendance.model');
 const Classroom = require('./classroom.model');
+const ClassroomsStudent = require('./classroomsStudents.model');
 const Course = require('./courses.model');
 const Debts = require('./debts.model');
 const Exam = require('./exam.model');
@@ -13,8 +14,14 @@ const initModel = () => {
   Student.hasMany(Observations, { foreignKey: 'studentId' });
   Observations.belongsTo(Student, { foreignKey: 'studentId' });
 
-  Student.hasMany(Classroom, { foreignKey: 'studentId' });
-  Classroom.belongsTo(Student, { foreignKey: 'studentId' });
+  Student.hasMany(Classroom, { foreignKey: 'student_id' });
+  Classroom.belongsTo(Student, { foreignKey: 'student_id' });
+
+  Student.hasMany(ClassroomsStudent, { foreignKey: 'student_id' });
+  ClassroomsStudent.belongsTo(Student, { foreignKey: 'student_id' });
+
+  Classroom.hasMany(ClassroomsStudent, { foreignKey: 'classroom_id' });
+  ClassroomsStudent.belongsTo(Classroom, { foreignKey: 'classroom_id' });
 
   Student.hasMany(Debts, { foreignKey: 'studentId' });
   Debts.belongsTo(Student, { foreignKey: 'studentId' });

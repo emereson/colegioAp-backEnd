@@ -12,11 +12,7 @@ router.use(authMiddleware.protect);
 
 router.get('/', classroomController.findAll);
 router.get('/student/:id', classroomController.findAllStudent);
-router.post(
-  '/:id',
-  studentMiddleware.validExistStudent,
-  classroomController.create
-);
+router.post('/', classroomController.create);
 
 router
   .route('/:id')
