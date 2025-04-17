@@ -1,6 +1,51 @@
 const catchAsync = require('../utils/catchAsync');
 const Payments = require('../models/payments.model');
 const { clientWhatsApp } = require('../utils/whatsapp');
+const Student = require('../models/student.model');
+const { Op } = require('sequelize');
+const ClassroomsStudent = require('../models/classroomsStudents.model');
+const Classroom = require('../models/classroom.model');
+
+exports.findAllStudents = catchAsync(async (req, res, next) => {
+  const { search } = req.query;
+
+  // Si search está vacío o no contiene letras, devolver array vacío
+  if (!search || search.trim() === '') {
+    return res.status(200).json({
+      status: 'Success',
+      results: 0,
+      students: [],
+    });
+  }
+
+  const searchTerm = search.trim();
+
+  const students = await Student.findAll({
+    where: {
+      [Op.or]: [
+        { lastName: { [Op.iLike]: `%${searchTerm}%` } },
+        { name: { [Op.iLike]: `%${searchTerm}%` } },
+        { dni: { [Op.like]: `%${searchTerm}%` } },
+        { phoneNumber: { [Op.like]: `%${searchTerm}%` } },
+      ],
+    },
+    include: [
+      {
+        model: ClassroomsStudent,
+        include: [
+          { model: Payments, separate: true, order: [['date', 'ASC']] },
+          { model: Classroom },
+        ],
+      },
+    ],
+  });
+
+  return res.status(200).json({
+    status: 'Success',
+    results: students.length,
+    students,
+  });
+});
 
 exports.findAll = catchAsync(async (req, res, next) => {
   const { id } = req.params;
@@ -22,11 +67,12 @@ exports.create = catchAsync(async (req, res, next) => {
   const { name, date, amount, student, notificationWhatsApp } = req.body;
 
   const pay = await Payments.create({
-    classroomId: id,
+    classroom_student_id: id,
     name,
     date,
     amount,
   });
+
   if (notificationWhatsApp) {
     const message = `Se le comunica que se ha registrado un pago por concepto de ${name} ascendente al monto de s./${amount} En nuestro sistema. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/
   `;

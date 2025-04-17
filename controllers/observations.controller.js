@@ -1,6 +1,41 @@
 const catchAsync = require('../utils/catchAsync');
 const Observations = require('../models/observations.model');
 const { clientWhatsApp } = require('../utils/whatsapp');
+const Student = require('../models/student.model');
+const { Op } = require('sequelize');
+
+exports.findAllStudents = catchAsync(async (req, res, next) => {
+  const { search } = req.query;
+
+  // Si search está vacío o no contiene letras, devolver array vacío
+  if (!search || search.trim() === '') {
+    return res.status(200).json({
+      status: 'Success',
+      results: 0,
+      students: [],
+    });
+  }
+
+  const searchTerm = search.trim();
+
+  const students = await Student.findAll({
+    where: {
+      [Op.or]: [
+        { lastName: { [Op.iLike]: `%${searchTerm}%` } },
+        { name: { [Op.iLike]: `%${searchTerm}%` } },
+        { dni: { [Op.like]: `%${searchTerm}%` } },
+        { phoneNumber: { [Op.like]: `%${searchTerm}%` } },
+      ],
+    },
+    include: [{ model: Observations }],
+  });
+
+  return res.status(200).json({
+    status: 'Success',
+    results: students.length,
+    students,
+  });
+});
 
 exports.findAllStudentId = catchAsync(async (req, res, next) => {
   const { id } = req.params;

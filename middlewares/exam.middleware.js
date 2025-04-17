@@ -1,6 +1,6 @@
+const Exam = require('../models/exams.model');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
-const Exam = require('../models/exam.model');
 
 exports.validExistExam = catchAsync(async (req, res, next) => {
   const { id } = req.params;

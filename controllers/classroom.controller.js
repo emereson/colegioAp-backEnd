@@ -1,9 +1,10 @@
 const catchAsync = require('../utils/catchAsync');
 const Classroom = require('../models/classroom.model');
 const Student = require('../models/student.model');
-const Course = require('../models/courses.model');
+const Course = require('../models/exams.model');
 const Payments = require('../models/payments.model');
 const AppError = require('../utils/AppError');
+const ClassroomsStudent = require('../models/classroomsStudents.model');
 
 exports.findAll = catchAsync(async (req, res, next) => {
   const { year, aula } = req.query;
@@ -23,6 +24,7 @@ exports.findAll = catchAsync(async (req, res, next) => {
   const classroom = await Classroom.findAll({
     where: whereFilter,
     order: [['name', 'ASC']],
+    include: [{ model: ClassroomsStudent }],
   });
 
   return res.status(200).json({
@@ -96,11 +98,12 @@ exports.findOne = catchAsync(async (req, res, next) => {
 exports.update = catchAsync(async (req, res, next) => {
   const { classroom } = req;
 
-  const { name, tutor } = req.body;
+  const { name, tutor, year } = req.body;
 
-  await classroom.create({
+  await classroom.update({
     name,
     tutor,
+    year,
   });
 
   return res.status(200).json({

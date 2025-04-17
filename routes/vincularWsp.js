@@ -54,22 +54,12 @@ clientWhatsApp.on('disconnected', (reason) => {
 router.get('/qr', async (req, res) => {
   let responded = false;
 
-  // Genera el código QR si el cliente no está autenticado
   if (!isAuthenticated) {
     clientWhatsApp.on('qr', async (qr) => {
       if (!responded) {
         try {
-          const qrCodeHTML = await qrcode.toDataURL(qr);
-          res.send(`
-            <html>
-              <body style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
-                <div style="text-align: center;">
-                  <h1>Escanea el código QR para vincular WhatsApp</h1>
-                  <img src="${qrCodeHTML}" alt="Código QR de WhatsApp" style="margin-top: 20px; width: 200px; height: 200px;"/>
-                </div>
-              </body>
-            </html>
-          `);
+          const qrCodeDataURL = await qrcode.toDataURL(qr);
+          res.json({ status: 'pending', qrCode: qrCodeDataURL });
           responded = true;
         } catch (error) {
           res.status(500).send('Error generando el código QR.');
@@ -77,15 +67,10 @@ router.get('/qr', async (req, res) => {
       }
     });
   } else {
-    res.send(`
-      <html>
-        <body style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
-          <div style="text-align: center;">
-            <h1>El cliente de WhatsApp ya está vinculado.</h1>
-          </div>
-        </body>
-      </html>
-    `);
+    res.json({
+      status: 'authenticated',
+      message: 'El cliente de WhatsApp ya está vinculado.',
+    });
   }
 });
 

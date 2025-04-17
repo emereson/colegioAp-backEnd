@@ -6,14 +6,13 @@ const Student = require('../models/student.model');
 const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 const { storage } = require('../utils/firebase');
 const Classroom = require('../models/classroom.model');
-const Course = require('../models/courses.model');
-const Exam = require('../models/exam.model');
+const Exam = require('../models/exams.model');
+const Course = require('../models/course.model');
 const Attendance = require('../models/attendance.model');
 const { Op } = require('sequelize');
 const Payments = require('../models/payments.model');
 const Observations = require('../models/observations.model');
 const Debts = require('../models/debts.model');
-const { db } = require('../database/config');
 const ClassroomsStudent = require('../models/classroomsStudents.model');
 
 exports.findAll = catchAsync(async (req, res, next) => {
@@ -43,7 +42,11 @@ exports.findAll = catchAsync(async (req, res, next) => {
   const students = await Student.findAll({
     where: whereFilter, // Aplicamos el filtro de búsqueda
     include: [
-      { model: ClassroomsStudent, where: whereClassroom, required: false },
+      {
+        model: ClassroomsStudent,
+        where: whereClassroom,
+        required: whereClassroom.classroom_id ? true : false,
+      },
     ],
     order: [['createdAt', 'DESC']],
     ...(shouldLimit && { limit: 10 }), // Incluimos la relación con la tabla Classroom
@@ -166,13 +169,13 @@ exports.findAllClassroomExamName = catchAsync(async (req, res, next) => {
         },
         include: [
           {
-            model: Course,
+            model: Exam,
             where: {
               name: nameExam,
             },
             include: [
               {
-                model: Exam,
+                model: Course,
               },
             ],
           },

@@ -8,7 +8,7 @@ const Payments = db.define('payments', {
     allowNull: false,
     type: DataTypes.INTEGER,
   },
-  classroomId: {
+  classroom_student_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },

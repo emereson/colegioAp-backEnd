@@ -10,6 +10,10 @@ const Attendance = db.define('attendance', {
   },
   classroomId: {
     type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  classroom_student_id: {
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   date: {

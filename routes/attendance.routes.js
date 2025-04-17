@@ -11,7 +11,8 @@ const router = express.Router();
 router.use(authMiddleware.protect);
 
 router.get('/', attemndanceController.findAll);
-router.get('/:id/classroom', attemndanceController.findAllAttendanceClassroom);
+router.get('/classroom/:id/:fecha', attemndanceController.findAllAttendance);
+router.post('/classroom', attemndanceController.createsOrUpdates);
 
 router
   .route('/:id')

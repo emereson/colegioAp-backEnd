@@ -21,6 +21,12 @@ const Debts = db.define('debts', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+
+  status: {
+    type: DataTypes.ENUM('Pendiente', 'Cancelada'),
+    allowNull: false,
+    defaultValue: 'Pendiente',
+  },
 });
 
 module.exports = Debts;

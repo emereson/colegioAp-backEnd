@@ -11,7 +11,8 @@ const router = express.Router();
 router.use(authMiddleware.protect);
 
 router.get('/', examController.findAll);
-router.post('/whatsApp', examController.whatsApp);
+router.get('/whatsApp/:id/:nameExam', examController.whatsApp);
+router.post('/classrooms', examController.createClassrooms);
 
 router
   .route('/:id')

@@ -1,7 +1,6 @@
 const catchAsync = require('../utils/catchAsync');
 const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 const { storage } = require('../utils/firebase');
-const Calendar = require('../models/calendar.model');
 const Notifications = require('../models/notifications.model');
 
 exports.findAll = catchAsync(async (req, res, next) => {
@@ -49,8 +48,6 @@ exports.findOne = catchAsync(async (req, res, next) => {
 exports.update = catchAsync(async (req, res) => {
   const { notification } = req;
   const { title } = req.body;
-
-  console.log(title);
 
   if (req.file) {
     const imgRef = ref(

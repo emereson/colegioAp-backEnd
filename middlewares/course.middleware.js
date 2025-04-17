@@ -1,4 +1,4 @@
-const Course = require('../models/courses.model');
+const Course = require('../models/course.model');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 

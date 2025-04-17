@@ -1,6 +1,8 @@
 const catchAsync = require('../utils/catchAsync');
-const Exam = require('../models/exam.model');
+const Exam = require('../models/exams.model');
 const { clientWhatsApp } = require('../utils/whatsapp');
+const ClassroomsStudent = require('../models/classroomsStudents.model');
+const Student = require('../models/student.model');
 
 exports.findAll = catchAsync(async (req, res, next) => {
   const exams = await Exam.findAll({});
@@ -13,12 +15,27 @@ exports.findAll = catchAsync(async (req, res, next) => {
 });
 
 exports.whatsApp = catchAsync(async (req, res, next) => {
-  const { nameExam, studentsExam } = req.body;
+  const { id, nameExam } = req.params;
 
-  for (const student of studentsExam) {
-    const message = `Se le comunica que se ha registrado las notas del examen de la ${nameExam} del alumno ${student.name}. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/`;
+  const classroomsStudents = await ClassroomsStudent.findAll({
+    where: { classroom_id: id },
+    include: [
+      {
+        model: Exam,
+        where: { name: nameExam },
+        required: false,
+      },
+      {
+        model: Student,
+      },
+    ],
+    order: [[{ model: Student }, 'lastName', 'ASC']],
+  });
 
-    const numberWhatsApp = `+51${student.phoneNumber}`;
+  for (const classroomStudent of classroomsStudents) {
+    const message = `Se le comunica que se ha registrado las notas del examen de la ${classroomStudent?.exams?.[0].name} del alumno ${classroomStudent.student.name}. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/`;
+
+    const numberWhatsApp = `+51${classroomStudent.student.phoneNumber}`;
     const chatId = numberWhatsApp.substring(1) + '@c.us';
 
     const existNumber = await clientWhatsApp.getNumberId(chatId);
@@ -26,9 +43,12 @@ exports.whatsApp = catchAsync(async (req, res, next) => {
     // Verificar si el número de WhatsApp existe
     if (existNumber) {
       await clientWhatsApp.sendMessage(chatId, message);
-      console.log('Mensaje enviado a', student.name);
+      console.log('Mensaje enviado a', classroomStudent.student.name);
     } else {
-      console.log('Número de WhatsApp no encontrado para', student.name);
+      console.log(
+        'Número de WhatsApp no encontrado para',
+        classroomStudent.student.name
+      );
     }
 
     await new Promise((resolve) => setTimeout(resolve, 15000));
@@ -40,20 +60,51 @@ exports.whatsApp = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.createClassrooms = catchAsync(async (req, res, next) => {
+  const { idAula, data } = req.body;
+  const classroomsStudent = await ClassroomsStudent.findAll({
+    where: {
+      classroom_id: idAula,
+    },
+  });
+  if (!classroomsStudent.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'No  hay ningun alumno registrado para esta  aula',
+    });
+  }
+  await Promise.all(
+    classroomsStudent.map(
+      async ({ id }) =>
+        await Exam.create({
+          classroom_student_id: id,
+          name: data.name,
+          teacher: data.teacher,
+        })
+    )
+  );
+
+  return res.status(201).json({
+    status: 'Success',
+    message: 'course created successfully',
+    // course,
+  });
+});
+
 exports.create = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const { name, note } = req.body;
+  const { name, teacher } = req.body;
 
-  const exam = await Exam.create({
-    courseId: id,
+  const course = await Exam.create({
+    classroomId: id,
     name,
-    note,
+    teacher,
   });
 
   return res.status(201).json({
     status: 'Success',
-    message: 'The exam created successfully',
-    exam,
+    message: 'course created successfully',
+    course,
   });
 });
 

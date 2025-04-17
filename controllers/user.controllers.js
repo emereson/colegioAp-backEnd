@@ -72,15 +72,24 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 exports.update = catchAsync(async (req, res) => {
-  const { name, lastName, dni, role } = req.body;
+  const { name, lastName, dni, role, password } = req.body;
   const { user } = req;
 
-  await user.update({
+  const updateData = {
     name,
     lastName,
     dni,
     role,
-  });
+  };
+
+  console.log(password);
+
+  if (password && password !== 'undefined' && password.length > 3) {
+    const salt = await bcrypt.genSalt(12);
+    updateData.password = await bcrypt.hash(password, salt);
+  }
+
+  await user.update(updateData);
 
   return res.status(200).json({
     status: 'success',

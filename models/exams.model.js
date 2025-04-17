@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { db } = require('../database/config');
 
-const Classroom = db.define('classroom', {
+const Exam = db.define('exam', {
   id: {
     primaryKey: true,
     autoIncrement: true,
@@ -9,18 +9,19 @@ const Classroom = db.define('classroom', {
     type: DataTypes.INTEGER,
   },
 
+  classroom_student_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+
   name: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
-  tutor: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  year: {
+  teacher: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 });
 
-module.exports = Classroom;
+module.exports = Exam;

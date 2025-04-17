@@ -8,27 +8,21 @@ const Course = db.define('course', {
     allowNull: false,
     type: DataTypes.INTEGER,
   },
-
-  classroomId: {
+  exam_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  classroom_student_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-
-  // student_id: {
-  //   type: DataTypes.INTEGER,
-  //   allowNull: false,
-  // },
   name: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
+    set(value) {
+      this.setDataValue('name', value.toUpperCase());
+    },
   },
-  teacher: {
+  note: {
     type: DataTypes.STRING,
-    allowNull: true,
+    defaultValue: '0',
+    allowNull: false,
   },
 });
 

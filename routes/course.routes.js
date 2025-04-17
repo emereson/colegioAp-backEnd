@@ -10,6 +10,9 @@ const router = express.Router();
 router.get('/', courseController.findAll);
 
 router.use(authMiddleware.protect);
+// router.get('/', courseController.findAll);
+router.patch('/notas', courseController.updateNotas);
+router.post('/students', courseController.createStudens);
 
 router
   .route('/:id')

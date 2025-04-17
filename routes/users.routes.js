@@ -8,8 +8,8 @@ const userController = require('../controllers/user.controllers');
 const router = express.Router();
 
 router.post('/login', userController.login);
-router.post('/signup', userController.signup);
 router.use(authMiddleware.protect);
+router.post('/signup', userController.signup);
 router.get('/', userController.findAll);
 
 router

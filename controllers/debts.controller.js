@@ -1,9 +1,45 @@
 const catchAsync = require('../utils/catchAsync');
 const Debts = require('../models/debts.model');
 const { clientWhatsApp } = require('../utils/whatsapp');
+const Student = require('../models/student.model');
+const { Op } = require('sequelize');
 
-exports.findAllStudentId = catchAsync(async (req, res, next) => {
+exports.findAllStudents = catchAsync(async (req, res, next) => {
+  const { search } = req.query;
+
+  // Si search está vacío o no contiene letras, devolver array vacío
+  if (!search || search.trim() === '') {
+    return res.status(200).json({
+      status: 'Success',
+      results: 0,
+      students: [],
+    });
+  }
+
+  const searchTerm = search.trim();
+
+  const students = await Student.findAll({
+    where: {
+      [Op.or]: [
+        { lastName: { [Op.iLike]: `%${searchTerm}%` } },
+        { name: { [Op.iLike]: `%${searchTerm}%` } },
+        { dni: { [Op.like]: `%${searchTerm}%` } },
+        { phoneNumber: { [Op.like]: `%${searchTerm}%` } },
+      ],
+    },
+    include: [{ model: Debts }],
+  });
+
+  return res.status(200).json({
+    status: 'Success',
+    results: students.length,
+    students,
+  });
+});
+
+exports.findAllStudent = catchAsync(async (req, res, next) => {
   const { id } = req.params;
+
   const debts = await Debts.findAll({
     where: {
       studentId: id,
@@ -18,11 +54,11 @@ exports.findAllStudentId = catchAsync(async (req, res, next) => {
 });
 
 exports.create = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const { name, amount, student, notificationWhatsApp } = req.body;
+  const { student } = req;
+  const { name, amount, notificationWhatsApp } = req.body;
 
   const debt = await Debts.create({
-    studentId: id,
+    studentId: student.id,
     name,
     amount,
   });
@@ -49,12 +85,12 @@ exports.create = catchAsync(async (req, res, next) => {
 
 exports.update = catchAsync(async (req, res) => {
   const { debt } = req;
-  const { name, amount } = req.body;
+  const { name, amount, status } = req.body;
 
   await debt.update({
     name,
-
     amount,
+    status,
   });
 
   return res.status(200).json({

@@ -2,7 +2,6 @@ const express = require('express');
 
 const classroomMiddleware = require('../middlewares/classroom.middleware');
 const authMiddleware = require('../middlewares/auth.middleware');
-const studentMiddleware = require('../middlewares/student.middleware');
 
 const classroomController = require('../controllers/classroom.controller');
 
