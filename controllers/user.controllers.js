@@ -82,8 +82,6 @@ exports.update = catchAsync(async (req, res) => {
     role,
   };
 
-  console.log(password);
-
   if (password && password !== 'undefined' && password.length > 3) {
     const salt = await bcrypt.genSalt(12);
     updateData.password = await bcrypt.hash(password, salt);

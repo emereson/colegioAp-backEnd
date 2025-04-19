@@ -67,7 +67,8 @@ exports.validExistStudent2 = catchAsync(async (req, res, next) => {
     },
     include: [
       {
-        model: Classroom,
+        model: ClassroomsStudent,
+        include: [{ model: Classroom }],
       },
       {
         model: Observations,
@@ -81,9 +82,7 @@ exports.validExistStudent2 = catchAsync(async (req, res, next) => {
     return next(new AppError(`data of the student not found`, 404));
   }
   req.student = student;
-  req.Classroom = student.Classroom;
-  req.Observations = student.Observations;
-  req.Debts = student.Debts;
+
   next();
 });
 
