@@ -72,7 +72,6 @@ exports.create = catchAsync(async (req, res, next) => {
 
 exports.notification = catchAsync(async (req, res, next) => {
   const { observation } = req;
-  console.log(observation.student);
 
   if (notificationWhatsApp) {
     const message = `Se le comunica que se ha registrado la siguiente observación ${observation.name} del alumno ${observation.student.name} ${observation.student.lastName}. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/`;
