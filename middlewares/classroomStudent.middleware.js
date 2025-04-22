@@ -5,7 +5,6 @@ const ClassroomsStudent = require('../models/classroomsStudents.model');
 const Exam = require('../models/exams.model');
 const Attendance = require('../models/attendance.model');
 const Course = require('../models/course.model');
-const Classroom = require('../models/classroom.model');
 
 exports.validExistClassroomsStudent = catchAsync(async (req, res, next) => {
   const { id } = req.params;

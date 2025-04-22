@@ -1,4 +1,5 @@
 const Observations = require('../models/observations.model');
+const Student = require('../models/student.model');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 
@@ -9,6 +10,7 @@ exports.validExistObservations = catchAsync(async (req, res, next) => {
     where: {
       id,
     },
+    include: [{ model: Student }],
   });
   if (!observation) {
     return next(new AppError(`data of the observation not found`, 404));

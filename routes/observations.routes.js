@@ -18,6 +18,11 @@ router.get(
   observationsController.findAllStudentId
 );
 
+router.get(
+  '/notification/:id',
+  observationsMiddleware.validExistObservations,
+  observationsController.notification
+);
 router
   .route('/:id')
   .post(studentMiddleware.validExistStudent, observationsController.create)

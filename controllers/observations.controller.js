@@ -62,10 +62,22 @@ exports.create = catchAsync(async (req, res, next) => {
     name,
     description,
   });
-  if (notificationWhatsApp) {
-    const message = `Se le comunica que se ha registrado la siguiente observación ${name} del alumno ${student.name} ${student.lastName}. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/`;
 
-    const numberWhatsApp = `+51${student.phoneNumber}`;
+  return res.status(201).json({
+    status: 'Success',
+    message: 'observation created successfully',
+    observation,
+  });
+});
+
+exports.notification = catchAsync(async (req, res, next) => {
+  const { observation } = req;
+  console.log(observation.student);
+
+  if (notificationWhatsApp) {
+    const message = `Se le comunica que se ha registrado la siguiente observación ${observation.name} del alumno ${observation.student.name} ${observation.student.lastName}. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/`;
+
+    const numberWhatsApp = `+51${observation.student.phoneNumber}`;
     const chatId = numberWhatsApp.substring(1) + '@c.us';
 
     const existNumber = await clientWhatsApp.getNumberId(chatId);
@@ -75,9 +87,25 @@ exports.create = catchAsync(async (req, res, next) => {
       console.log('mensaje enviado');
     }
   }
-  return res.status(201).json({
-    status: 'Success',
-    message: 'observation created successfully',
+
+  return res.status(200).json({
+    status: 'success',
+    observation,
+  });
+});
+
+exports.update = catchAsync(async (req, res, next) => {
+  const { observation } = req;
+  const { name, description } = req.body;
+
+  await observation.update({
+    name,
+    description,
+  });
+
+  return res.status(200).json({
+    status: 'success',
+    message: 'the observation has been updated',
     observation,
   });
 });

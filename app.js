@@ -25,6 +25,7 @@ const galeryPhotosRouter = require('./routes/galeryPhotos.routes');
 const accessStudentRouter = require('./routes/accessStudent.routes');
 const vincularWspRouter = require('./routes/vincularWsp');
 const archivosRouter = require('./modules/archivos/archivos.routes');
+const studentFilesRouter = require('./modules/studentFiles/studentFiles.routes');
 
 const app = express();
 
@@ -67,6 +68,7 @@ app.use('/api/v1/galeryPhotos', galeryPhotosRouter);
 app.use('/api/v1/accessStudent', accessStudentRouter);
 app.use('/api/v1/vincular-wsp', vincularWspRouter);
 app.use('/api/v1/archivos', archivosRouter);
+app.use('/api/v1/student-files', studentFilesRouter);
 
 app.all('*', (req, res, next) => {
   return next(
