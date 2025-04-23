@@ -1,8 +1,8 @@
 const catchAsync = require('../utils/catchAsync');
 const Observations = require('../models/observations.model');
-const { clientWhatsApp } = require('../utils/whatsapp');
 const Student = require('../models/student.model');
 const { Op } = require('sequelize');
+const { clientWhatsApp } = require('../routes/vincularWsp');
 
 exports.findAllStudents = catchAsync(async (req, res, next) => {
   const { search } = req.query;
@@ -73,18 +73,16 @@ exports.create = catchAsync(async (req, res, next) => {
 exports.notification = catchAsync(async (req, res, next) => {
   const { observation } = req;
 
-  if (notificationWhatsApp) {
-    const message = `Se le comunica que se ha registrado la siguiente observación ${observation.name} del alumno ${observation.student.name} ${observation.student.lastName}. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/`;
+  const message = `Se le comunica que se ha registrado la siguiente observación ${observation.name} del alumno ${observation.student.name} ${observation.student.lastName}. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/`;
 
-    const numberWhatsApp = `+51${observation.student.phoneNumber}`;
-    const chatId = numberWhatsApp.substring(1) + '@c.us';
+  const numberWhatsApp = `+51${observation.student.phoneNumber}`;
+  const chatId = numberWhatsApp.substring(1) + '@c.us';
 
-    const existNumber = await clientWhatsApp.getNumberId(chatId);
+  const existNumber = await clientWhatsApp.getNumberId(chatId);
 
-    if (existNumber) {
-      await clientWhatsApp.sendMessage(chatId, message);
-      console.log('mensaje enviado');
-    }
+  if (existNumber) {
+    await clientWhatsApp.sendMessage(chatId, message);
+    console.log('mensaje enviado');
   }
 
   return res.status(200).json({
