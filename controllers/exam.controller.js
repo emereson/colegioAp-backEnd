@@ -51,7 +51,7 @@ exports.whatsApp = catchAsync(async (req, res, next) => {
       );
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 15000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
   }
 
   // Enviar respuesta al cliente
