@@ -1,8 +1,8 @@
 const catchAsync = require('../utils/catchAsync');
 const Exam = require('../models/exams.model');
-const { clientWhatsApp } = require('../utils/whatsapp');
 const ClassroomsStudent = require('../models/classroomsStudents.model');
 const Student = require('../models/student.model');
+const { clientWhatsApp } = require('../routes/vincularWsp');
 
 exports.findAll = catchAsync(async (req, res, next) => {
   const exams = await Exam.findAll({});
