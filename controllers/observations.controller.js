@@ -3,7 +3,7 @@ const Observations = require('../models/observations.model');
 const Student = require('../models/student.model');
 const { Op } = require('sequelize');
 const { clientWhatsApp } = require('../routes/vincularWsp');
-const logger = require('./utils/logger');
+const logger = require('../utils/logger');
 
 exports.findAllStudents = catchAsync(async (req, res, next) => {
   const { search } = req.query;

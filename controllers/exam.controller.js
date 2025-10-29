@@ -3,7 +3,7 @@ const Exam = require('../models/exams.model');
 const ClassroomsStudent = require('../models/classroomsStudents.model');
 const Student = require('../models/student.model');
 const { clientWhatsApp } = require('../routes/vincularWsp');
-const logger = require('./utils/logger');
+const logger = require('../utils/logger');
 
 exports.findAll = catchAsync(async (req, res, next) => {
   const exams = await Exam.findAll({});
