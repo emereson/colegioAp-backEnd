@@ -5,7 +5,7 @@ const Student = require('../models/student.model');
 const { Op } = require('sequelize');
 const ClassroomsStudent = require('../models/classroomsStudents.model');
 const Classroom = require('../models/classroom.model');
-const { logger } = require('./utils/logger');
+const logger = require('./utils/logger');
 
 exports.findAllStudents = catchAsync(async (req, res, next) => {
   const { search } = req.query;

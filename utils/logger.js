@@ -15,4 +15,4 @@ const logger = pino({
       : undefined, // en producción, logs JSON
 });
 
-module.exports = { logger };
+module.exports = logger;
