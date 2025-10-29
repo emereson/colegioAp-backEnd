@@ -15,4 +15,4 @@ const logger = pino({
       : undefined, // en producción, logs JSON
 });
 
-export default logger;
+module.exports = { logger };

@@ -2,7 +2,7 @@ const express = require('express');
 const { Client, NoAuth } = require('whatsapp-web.js');
 const puppeteer = require('puppeteer');
 const qrcode = require('qrcode');
-const { default: logger } = require('../utils/logger');
+const { logger } = require('./utils/logger');
 
 const router = express.Router();
 
