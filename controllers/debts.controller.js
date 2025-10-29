@@ -3,6 +3,7 @@ const Debts = require('../models/debts.model');
 const { clientWhatsApp } = require('../utils/whatsapp');
 const Student = require('../models/student.model');
 const { Op } = require('sequelize');
+const { default: logger } = require('../utils/logger');
 
 exports.findAllStudents = catchAsync(async (req, res, next) => {
   const { search } = req.query;
@@ -73,7 +74,7 @@ exports.create = catchAsync(async (req, res, next) => {
 
     if (existNumber) {
       await clientWhatsApp.sendMessage(chatId, message);
-      console.log('mensaje enviado');
+      logger.info('mensaje enviado');
     }
   }
   res.status(201).json({

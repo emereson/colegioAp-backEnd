@@ -3,6 +3,7 @@ const Exam = require('../models/exams.model');
 const ClassroomsStudent = require('../models/classroomsStudents.model');
 const Student = require('../models/student.model');
 const { clientWhatsApp } = require('../routes/vincularWsp');
+const { default: logger } = require('../utils/logger');
 
 exports.findAll = catchAsync(async (req, res, next) => {
   const exams = await Exam.findAll({});
@@ -43,9 +44,9 @@ exports.whatsApp = catchAsync(async (req, res, next) => {
     // Verificar si el número de WhatsApp existe
     if (existNumber) {
       await clientWhatsApp.sendMessage(chatId, message);
-      console.log('Mensaje enviado a', classroomStudent.student.name);
+      logger.info('Mensaje enviado a', classroomStudent.student.name);
     } else {
-      console.log(
+      logger.info(
         'Número de WhatsApp no encontrado para',
         classroomStudent.student.name
       );

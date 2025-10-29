@@ -299,7 +299,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const token = await generateJWT(student.id);
 
-  console.log(token);
   res.status(201).json({
     status: 'success',
     token,
