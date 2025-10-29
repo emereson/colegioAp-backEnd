@@ -71,6 +71,8 @@ exports.findAllNotas = catchAsync(async (req, res, next) => {
       },
       {
         model: Student,
+        where: { status: 'activo' },
+        attributes: { exclude: ['password'] },
       },
       { model: Classroom },
     ],

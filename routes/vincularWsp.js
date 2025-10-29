@@ -8,7 +8,7 @@ const router = express.Router();
 const clientWhatsApp = new Client({
   authStrategy: new NoAuth(),
   puppeteer: {
-    executablePath: puppeteer.executablePath(),
+//    executablePath: puppeteer.executablePath(),
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   },
 });
