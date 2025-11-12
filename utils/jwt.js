@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const logger = require('./logger');
 
 const generateJWT = (id) => {
   return new Promise((resolve, reject) => {
@@ -12,7 +13,7 @@ const generateJWT = (id) => {
       },
       (err, token) => {
         if (err) {
-          console.log(err);
+          logger.info(err);
           reject(err);
         }
 

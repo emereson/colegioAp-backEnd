@@ -2,6 +2,7 @@ const express = require('express');
 const { Client, NoAuth } = require('whatsapp-web.js');
 const puppeteer = require('puppeteer');
 const qrcode = require('qrcode');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ const initializeClient = (() => {
     if (!initialized) {
       clientWhatsApp.initialize();
       initialized = true;
-      console.log('Cliente de WhatsApp inicializado.');
+      logger.info('Cliente de WhatsApp inicializado.');
     }
     next();
   };
@@ -34,24 +35,24 @@ router.use(initializeClient);
 // EVENTOS una sola vez (fuera de los endpoints)
 clientWhatsApp.on('authenticated', () => {
   isAuthenticated = true;
-  console.log('✅ Cliente autenticado.');
+  logger.info('✅ Cliente autenticado.');
 });
 
 clientWhatsApp.on('ready', () => {
-  console.log('✅ Cliente listo para usar.');
+  logger.info('✅ Cliente listo para usar.');
 });
 
 clientWhatsApp.on('disconnected', (reason) => {
-  console.error('❌ Cliente desconectado:', reason);
+  logger.error('❌ Cliente desconectado:', reason);
   isAuthenticated = false;
 });
 
 clientWhatsApp.on('qr', async (qr) => {
   try {
     lastQRCode = await qrcode.toDataURL(qr);
-    console.log('🔁 Nuevo código QR generado.');
+    logger.info('🔁 Nuevo código QR generado.');
   } catch (err) {
-    console.error('Error al generar QR:', err);
+    logger.error('Error al generar QR:', err);
     lastQRCode = null;
   }
 });

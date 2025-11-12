@@ -73,7 +73,7 @@ exports.create = catchAsync(async (req, res, next) => {
 
     if (existNumber) {
       await clientWhatsApp.sendMessage(chatId, message);
-      console.log('mensaje enviado');
+      logger.info('mensaje enviado');
     }
   }
   res.status(201).json({

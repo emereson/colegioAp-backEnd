@@ -5,6 +5,7 @@ const Student = require('../models/student.model');
 const { Op } = require('sequelize');
 const ClassroomsStudent = require('../models/classroomsStudents.model');
 const Classroom = require('../models/classroom.model');
+const logger = require('../utils/logger');
 
 exports.findAllStudents = catchAsync(async (req, res, next) => {
   const { search } = req.query;
@@ -66,6 +67,7 @@ exports.create = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { name, date, amount, student, notificationWhatsApp } = req.body;
 
+  // Crear el pago
   const pay = await Payments.create({
     classroom_student_id: id,
     name,
@@ -73,24 +75,32 @@ exports.create = catchAsync(async (req, res, next) => {
     amount,
   });
 
+  // Si está activada la notificación por WhatsApp
   if (notificationWhatsApp) {
-    const message = `Se le comunica que se ha registrado un pago por concepto de ${name} ascendente al monto de s./${amount} En nuestro sistema. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/
-  `;
+    const message = `Se le comunica que se ha registrado un pago por concepto de ${name}, ascendente al monto de S/.${amount}. Para mayor detalle puede ingresar a la siguiente dirección: https://alipioponce.com/`;
 
-    const numberWhatsApp = `+51${student.phoneNumber}`;
-    const chatId = numberWhatsApp.substring(1) + '@c.us';
+    const number = `51${student.phoneNumber}`; // sin el '+'
 
-    const existNumber = await clientWhatsApp.getNumberId(chatId);
+    try {
+      // Obtener ID del número
+      const numberDetails = await clientWhatsApp.getNumberId(number);
 
-    if (existNumber) {
-      await clientWhatsApp.sendMessage(chatId, message);
-      console.log('mensaje enviado');
+      if (!numberDetails) {
+        logger.info(`⚠️ Número no encontrado o no tiene WhatsApp: ${number}`);
+      } else {
+        const chatId = numberDetails._serialized;
+        await clientWhatsApp.sendMessage(chatId, message);
+        logger.info(`✅ Mensaje enviado a ${chatId}`);
+      }
+    } catch (err) {
+      logger.error('❌ Error al enviar mensaje de WhatsApp:', err.message);
     }
   }
 
+  // Respuesta final
   res.status(201).json({
     status: 'success',
-    message: 'the pay has ben created successfully!',
+    message: 'El pago se ha registrado correctamente.',
     pay,
   });
 });

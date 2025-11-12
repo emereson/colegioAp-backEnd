@@ -14,6 +14,7 @@ const Payments = require('../models/payments.model');
 const Observations = require('../models/observations.model');
 const Debts = require('../models/debts.model');
 const ClassroomsStudent = require('../models/classroomsStudents.model');
+const logger = require('../utils/logger');
 
 exports.findAll = catchAsync(async (req, res, next) => {
   const { name, aula } = req.query; // Aquí es donde recibimos el parámetro de búsqueda
@@ -299,7 +300,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const token = await generateJWT(student.id);
 
-  console.log(token);
+  logger.info(token);
   res.status(201).json({
     status: 'success',
     token,

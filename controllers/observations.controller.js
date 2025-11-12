@@ -3,6 +3,7 @@ const Observations = require('../models/observations.model');
 const Student = require('../models/student.model');
 const { Op } = require('sequelize');
 const { clientWhatsApp } = require('../routes/vincularWsp');
+const logger = require('../utils/logger');
 
 exports.findAllStudents = catchAsync(async (req, res, next) => {
   const { search } = req.query;
@@ -75,14 +76,31 @@ exports.notification = catchAsync(async (req, res, next) => {
 
   const message = `Se le comunica que se ha registrado la siguiente observación ${observation.name} del alumno ${observation.student.name} ${observation.student.lastName}. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/`;
 
-  const numberWhatsApp = `+51${observation.student.phoneNumber}`;
-  const chatId = numberWhatsApp.substring(1) + '@c.us';
+  const number = `51${observation.student.phoneNumber}`; // sin el '+'
 
-  const existNumber = await clientWhatsApp.getNumberId(chatId);
+  // 👇 obtener correctamente el ID del número
+  const numberDetails = await clientWhatsApp.getNumberId(number);
 
-  if (existNumber) {
+  if (!numberDetails) {
+    logger.info(`⚠️ Número no encontrado o no tiene WhatsApp: ${number}`);
+    return res.status(404).json({
+      status: 'fail',
+      message: `El número ${number} no tiene cuenta de WhatsApp`,
+    });
+  }
+
+  const chatId = numberDetails._serialized; // formato correcto, ej: "51987654321@c.us"
+
+  try {
     await clientWhatsApp.sendMessage(chatId, message);
-    console.log('mensaje enviado');
+    logger.info(`✅ Mensaje enviado a ${chatId}`);
+  } catch (err) {
+    logger.error('❌ Error al enviar mensaje:', err.message);
+    return res.status(500).json({
+      status: 'fail',
+      message: 'Error al enviar el mensaje de WhatsApp',
+      error: err.message,
+    });
   }
 
   return res.status(200).json({

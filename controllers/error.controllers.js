@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -14,7 +16,7 @@ const sendErrorProd = (err, res) => {
       message: err.message,
     });
   } else {
-    console.error('error 🧨', err);
+    logger.error('error 🧨', err);
     res.status(500).json({
       status: 'fail',
       message: 'Internal server error',

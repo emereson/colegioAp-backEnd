@@ -2,6 +2,7 @@ const FormData = require('form-data');
 const Archivo = require('./archivos.model');
 const catchAsync = require('../../utils/catchAsync');
 const { default: axios } = require('axios');
+const logger = require('../../utils/logger');
 
 exports.findAll = catchAsync(async (req, res, next) => {
   const archivos = await Archivo.findAll({});
@@ -122,7 +123,7 @@ exports.delete = catchAsync(async (req, res) => {
       archivo,
     });
   } catch (error) {
-    console.error('Error deleting file:', error.message);
+    logger.error('Error deleting file:', error.message);
     return res.status(500).json({
       status: 'error',
       message: 'Error deleting file',
