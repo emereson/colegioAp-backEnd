@@ -1,9 +1,9 @@
-const GaleryPhotos = require('../models/galeryPhotos.model');
-const GaleryPhotosImg = require('../models/galeryPhotosImg');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
+import GaleryPhotos from '../models/galeryPhotos.model.js';
+import GaleryPhotosImg from '../models/galeryPhotosImg.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
 
-exports.validExistGaleryPhotos = catchAsync(async (req, res, next) => {
+export const validExistGaleryPhotos = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const galeryPhotos = await GaleryPhotos.findOne({

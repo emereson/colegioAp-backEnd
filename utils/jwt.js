@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const logger = require('./logger');
+import jwt from 'jsonwebtoken';
+import logger from './logger.js';
 
 const generateJWT = (id) => {
   return new Promise((resolve, reject) => {
@@ -18,9 +18,9 @@ const generateJWT = (id) => {
         }
 
         resolve(token);
-      }
+      },
     );
   });
 };
 
-module.exports = generateJWT;
+export default generateJWT;

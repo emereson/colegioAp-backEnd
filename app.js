@@ -1,35 +1,37 @@
-const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
-const helmet = require('helmet');
-const hpp = require('hpp');
+import express from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
+import helmet from 'helmet';
+import hpp from 'hpp';
 
-const AppError = require('./utils/AppError');
-const globalErrorHandler = require('./controllers/error.controllers');
-const { rateLimit } = require('express-rate-limit');
-const xss = require('xss-clean');
+import AppError from './utils/AppError.js';
+import globalErrorHandler from './controllers/error.controllers.js';
+import { rateLimit } from 'express-rate-limit';
 
-const usersRouter = require('./routes/users.routes');
-const classroomRouter = require('./routes/classroom.routes');
-const classroomsStudentRouter = require('./routes/classroomsStudent.routes');
-const courseRouter = require('./routes/course.routes');
-const examRouter = require('./routes/exam.routes');
-const studentRouter = require('./routes/student.routes');
-const attendanceRouter = require('./routes/attendance.routes');
-const paymentsRouter = require('./routes/payments.routes');
-const debtsRouter = require('./routes/debts.routes');
-const observationsRouter = require('./routes/observations.routes');
-const notificationsRouter = require('./routes/notifications.routes');
-const calendarRouter = require('./routes/calendar.routes');
-const galeryPhotosRouter = require('./routes/galeryPhotos.routes');
-const accessStudentRouter = require('./routes/accessStudent.routes');
-const vincularWspRouter = require('./routes/vincularWsp');
-const archivosRouter = require('./modules/archivos/archivos.routes');
-const studentFilesRouter = require('./modules/studentFiles/studentFiles.routes');
+import usersRouter from './routes/users.routes.js';
+import classroomRouter from './routes/classroom.routes.js';
+import classroomsStudentRouter from './routes/classroomsStudent.routes.js';
+import courseRouter from './routes/course.routes.js';
+import examRouter from './routes/exam.routes.js';
+import studentRouter from './routes/student.routes.js';
+import attendanceRouter from './routes/attendance.routes.js';
+import paymentsRouter from './routes/payments.routes.js';
+import debtsRouter from './routes/debts.routes.js';
+import observationsRouter from './routes/observations.routes.js';
+import notificationsRouter from './routes/notifications.routes.js';
+import calendarRouter from './routes/calendar.routes.js';
+import galeryPhotosRouter from './routes/galeryPhotos.routes.js';
+import accessStudentRouter from './routes/accessStudent.routes.js';
+import vincularWspRouter from './routes/vincularWsp.js';
+import archivosRouter from './modules/archivos/archivos.routes.js';
+import studentFilesRouter from './modules/studentFiles/studentFiles.routes.js';
+import semanaEvaluacionesRouter from './modules/evaluaciones/semanaEvaluacion/semanaEvaluacion.routes.js';
+import evaluacionRouter from './modules/evaluaciones/evaluacion/evaluacion.routes.js';
 
 const app = express();
 
 app.set('trust proxy', 1);
+
 const limiter = rateLimit({
   max: 1000000,
   windowMs: 60 * 60 * 1000,
@@ -42,11 +44,10 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use(express.json());
 app.use(cors());
-app.use(xss());
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
-  })
+  }),
 );
 app.use(hpp());
 
@@ -54,7 +55,6 @@ app.use('/api/v1', limiter);
 app.use('/api/v1/user', usersRouter);
 app.use('/api/v1/classroom', classroomRouter);
 app.use('/api/v1/classrooms-student', classroomsStudentRouter);
-
 app.use('/api/v1/course', courseRouter);
 app.use('/api/v1/exam', examRouter);
 app.use('/api/v1/student', studentRouter);
@@ -66,16 +66,21 @@ app.use('/api/v1/notifications', notificationsRouter);
 app.use('/api/v1/calendar', calendarRouter);
 app.use('/api/v1/galeryPhotos', galeryPhotosRouter);
 app.use('/api/v1/accessStudent', accessStudentRouter);
-app.use('/api/v1/vincular-wsp', vincularWspRouter.vincularWspRouter);
+app.use('/api/v1/vincular-wsp', vincularWspRouter);
 app.use('/api/v1/archivos', archivosRouter);
 app.use('/api/v1/student-files', studentFilesRouter);
+// evaluaciones
+app.use('/api/v1/semana-evaluaciones', semanaEvaluacionesRouter);
+app.use('/api/v1/evaluacion', evaluacionRouter);
 
-app.all('*', (req, res, next) => {
+// evaluaciones
+
+app.use((req, res, next) => {
   return next(
-    new AppError(`Can't find ${req.originalUrl} on this seerver! 💀`, 404)
+    new AppError(`Can't find ${req.originalUrl} on this seerver! 💀`, 404),
   );
 });
 
 app.use(globalErrorHandler);
 
-module.exports = app;
+export default app;

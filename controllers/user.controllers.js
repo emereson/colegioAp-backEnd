@@ -1,10 +1,10 @@
-const User = require('../models/user.model');
-const catchAsync = require('../utils/catchAsync');
-const bcrypt = require('bcryptjs');
-const generateJWT = require('../utils/jwt');
-const AppError = require('../utils/AppError');
+import User from '../models/user.model.js';
+import catchAsync from '../utils/catchAsync.js';
+import bcrypt from 'bcryptjs';
+import generateJWT from '../utils/jwt.js';
+import AppError from '../utils/AppError.js';
 
-exports.findAll = catchAsync(async (req, res, next) => {
+export const findAll = catchAsync(async (req, res, next) => {
   const users = await User.findAll({});
 
   return res.status(200).json({
@@ -14,7 +14,7 @@ exports.findAll = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { user } = req;
 
   return res.status(200).json({
@@ -23,7 +23,7 @@ exports.findOne = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.signup = catchAsync(async (req, res, next) => {
+export const signup = catchAsync(async (req, res, next) => {
   const { name, lastName, dni, password, role } = req.body;
 
   const salt = await bcrypt.genSalt(12);
@@ -41,13 +41,13 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: 'success',
-    message: 'the user has ben created successfully!',
+    message: 'The user has been created successfully!',
     token,
     user,
   });
 });
 
-exports.login = catchAsync(async (req, res, next) => {
+export const login = catchAsync(async (req, res, next) => {
   const { dni, password } = req.body;
 
   const user = await User.findOne({
@@ -66,12 +66,13 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const token = await generateJWT(user.id);
 
-  res.status(201).json({
+  res.status(200).json({
     status: 'success',
     token,
   });
 });
-exports.update = catchAsync(async (req, res) => {
+
+export const update = catchAsync(async (req, res) => {
   const { name, lastName, dni, role, password } = req.body;
   const { user } = req;
 
@@ -96,7 +97,7 @@ exports.update = catchAsync(async (req, res) => {
   });
 });
 
-exports.delete = catchAsync(async (req, res) => {
+export const remove = catchAsync(async (req, res) => {
   const { user } = req;
   await user.destroy();
 

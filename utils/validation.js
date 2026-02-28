@@ -1,9 +1,9 @@
-const Joi = require('joi');
+import Joi from 'joi';
 
 const noteSchema = Joi.object({
   title: Joi.string().required(),
 });
 
-exports.validateNote = (note) => {
+export const validateNote = (note) => {
   return noteSchema.validate(note, { abortEarly: true });
 };

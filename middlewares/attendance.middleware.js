@@ -1,8 +1,8 @@
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
-const Attendance = require('../models/attendance.model');
+import Attendance from '../models/attendance.model.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
 
-exports.validExistAttendance = catchAsync(async (req, res, next) => {
+export const validExistAttendance = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const attendance = await Attendance.findOne({

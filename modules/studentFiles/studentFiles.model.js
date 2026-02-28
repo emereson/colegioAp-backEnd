@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { db } = require('../../database/config');
+import { DataTypes } from 'sequelize';
+import db from '../../database/config.js';
 
 const StudentFiles = db.define('student_files', {
   id: {
@@ -25,4 +25,4 @@ const StudentFiles = db.define('student_files', {
   },
 });
 
-module.exports = StudentFiles;
+export default StudentFiles;

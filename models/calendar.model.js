@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { db } = require('../database/config');
+import { DataTypes } from 'sequelize';
+import db from '../database/config.js';
 
 const Calendar = db.define('calendar', {
   id: {
@@ -18,4 +18,4 @@ const Calendar = db.define('calendar', {
   },
 });
 
-module.exports = Calendar;
+export default Calendar;

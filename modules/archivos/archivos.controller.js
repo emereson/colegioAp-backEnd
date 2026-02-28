@@ -1,10 +1,12 @@
-const FormData = require('form-data');
-const Archivo = require('./archivos.model');
-const catchAsync = require('../../utils/catchAsync');
-const { default: axios } = require('axios');
-const logger = require('../../utils/logger');
+import FormData from 'form-data';
+import axios from 'axios';
+import Archivo from './archivos.model.js';
+import catchAsync from '../../utils/catchAsync.js';
+import logger from '../../utils/logger.js';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import storage from '../../utils/firebase.js';
 
-exports.findAll = catchAsync(async (req, res, next) => {
+export const findAll = catchAsync(async (req, res, next) => {
   const archivos = await Archivo.findAll({});
 
   return res.status(200).json({
@@ -13,7 +15,8 @@ exports.findAll = catchAsync(async (req, res, next) => {
     archivos,
   });
 });
-exports.findAllClassroom = catchAsync(async (req, res, next) => {
+
+export const findAllClassroom = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { classroom } = req;
 
@@ -27,7 +30,7 @@ exports.findAllClassroom = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { archivo } = req;
 
   return res.status(200).json({
@@ -36,7 +39,7 @@ exports.findOne = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.create = catchAsync(async (req, res, next) => {
+export const create = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { name_archivo } = req.body;
 
@@ -45,6 +48,7 @@ exports.create = catchAsync(async (req, res, next) => {
   if (req.file) {
     const file = req.file;
     const formDataImg = new FormData();
+
     formDataImg.append('image', file.buffer, {
       filename: file.originalname,
     });
@@ -53,14 +57,13 @@ exports.create = catchAsync(async (req, res, next) => {
       `${process.env.SERVER_IMAGE}/image`,
       formDataImg,
       {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+        headers: formDataImg.getHeaders(),
+      },
     );
 
     archivo_url = responseImg.data.imagePath;
   }
+
   const archivo = await Archivo.create({
     classroom_id: id,
     name_archivo,
@@ -74,18 +77,17 @@ exports.create = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.update = catchAsync(async (req, res) => {
+export const update = catchAsync(async (req, res) => {
   const { archivo } = req;
   const { title } = req.body;
 
   if (req.file) {
     const imgRef = ref(
       storage,
-      `archivoImg/${Date.now()}-${req.file.originalname}`
+      `archivoImg/${Date.now()}-${req.file.originalname}`,
     );
 
     await uploadBytes(imgRef, req.file.buffer);
-
     const imgUploaded = await getDownloadURL(imgRef);
 
     await archivo.update({
@@ -105,14 +107,13 @@ exports.update = catchAsync(async (req, res) => {
   });
 });
 
-exports.delete = catchAsync(async (req, res) => {
+export const remove = catchAsync(async (req, res) => {
   const { archivo } = req;
   const archivo_url = archivo.archivo_url;
 
   try {
-    // Corregir la solicitud axios - usar axios.delete en lugar de axios.post
     await axios.delete(
-      `${process.env.SERVER_IMAGE}/delete-image/${archivo_url}`
+      `${process.env.SERVER_IMAGE}/delete-image/${archivo_url}`,
     );
 
     await archivo.destroy();
@@ -124,6 +125,7 @@ exports.delete = catchAsync(async (req, res) => {
     });
   } catch (error) {
     logger.error('Error deleting file:', error.message);
+
     return res.status(500).json({
       status: 'error',
       message: 'Error deleting file',

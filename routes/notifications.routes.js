@@ -1,35 +1,36 @@
-const express = require('express');
-const { upload } = require('../utils/multer');
+import express from 'express';
+import { upload } from '../utils/multer.js';
 
-const notificationsMiddleware = require('../middlewares/notifications.middleware');
-const authMiddleware = require('../middlewares/auth.middleware');
-const notificationsController = require('../controllers/notifications.controller');
+import * as notificationsMiddleware from '../middlewares/notifications.middleware.js';
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as notificationsController from '../controllers/notifications.controller.js';
 
 const router = express.Router();
 
 router.use(authMiddleware.protect);
 
 router.get('/', notificationsController.findAll);
+
 router.post(
   '/',
   upload.single('notificationImg'),
-  notificationsController.create
+  notificationsController.create,
 );
 
 router
   .route('/:id')
   .get(
     notificationsMiddleware.validExistNotifications,
-    notificationsController.findOne
+    notificationsController.findOne,
   )
   .patch(
     upload.single('notificationImg'),
     notificationsMiddleware.validExistNotifications,
-    notificationsController.update
+    notificationsController.update,
   )
   .delete(
     notificationsMiddleware.validExistNotifications,
-    notificationsController.delete
+    notificationsController.remove,
   );
 
-module.exports = router;
+export default router;

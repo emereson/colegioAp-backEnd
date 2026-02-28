@@ -1,10 +1,10 @@
-const catchAsync = require('../utils/catchAsync');
-const Attendance = require('../models/attendance.model');
-const ClassroomsStudent = require('../models/classroomsStudents.model');
-const Student = require('../models/student.model');
-const Classroom = require('../models/classroom.model');
+import catchAsync from '../utils/catchAsync.js';
+import Attendance from '../models/attendance.model.js';
+import ClassroomsStudent from '../models/classroomsStudents.model.js';
+import Student from '../models/student.model.js';
+import Classroom from '../models/classroom.model.js';
 
-exports.findAll = catchAsync(async (req, res, next) => {
+export const findAll = catchAsync(async (req, res, next) => {
   const assists = await Attendance.findAll({});
 
   return res.status(200).json({
@@ -14,7 +14,7 @@ exports.findAll = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllAttendance = catchAsync(async (req, res, next) => {
+export const findAllAttendance = catchAsync(async (req, res, next) => {
   const { id, fecha } = req.params;
 
   const classroomsStudents = await ClassroomsStudent.findAll({
@@ -42,7 +42,7 @@ exports.findAllAttendance = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createsOrUpdates = catchAsync(async (req, res, next) => {
+export const createsOrUpdates = catchAsync(async (req, res, next) => {
   const { fecha, asistencias } = req.body;
 
   await Promise.all(
@@ -53,7 +53,7 @@ exports.createsOrUpdates = catchAsync(async (req, res, next) => {
           {
             where: { id: asistencia_id },
             individualHooks: true,
-          }
+          },
         );
       } else {
         await Attendance.create({
@@ -62,7 +62,7 @@ exports.createsOrUpdates = catchAsync(async (req, res, next) => {
           status,
         });
       }
-    })
+    }),
   );
 
   res.status(201).json({
@@ -71,7 +71,7 @@ exports.createsOrUpdates = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.create = catchAsync(async (req, res, next) => {
+export const create = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { status, date } = req.body;
 
@@ -88,7 +88,7 @@ exports.create = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.update = catchAsync(async (req, res) => {
+export const update = catchAsync(async (req, res) => {
   const { attendance } = req;
   const { status } = req.body;
 
@@ -103,7 +103,7 @@ exports.update = catchAsync(async (req, res) => {
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { attendance } = req;
 
   return res.status(200).json({

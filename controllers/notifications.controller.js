@@ -1,9 +1,9 @@
-const catchAsync = require('../utils/catchAsync');
-const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
-const { storage } = require('../utils/firebase');
-const Notifications = require('../models/notifications.model');
+import catchAsync from '../utils/catchAsync.js';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import Notifications from '../models/notifications.model.js';
+import storage from '../utils/firebase.js';
 
-exports.findAll = catchAsync(async (req, res, next) => {
+export const findAll = catchAsync(async (req, res, next) => {
   const notifications = await Notifications.findAll({});
 
   return res.status(200).json({
@@ -13,12 +13,12 @@ exports.findAll = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.create = catchAsync(async (req, res, next) => {
+export const create = catchAsync(async (req, res, next) => {
   const { title } = req.body;
 
   const imgRef = ref(
     storage,
-    `notificationImg/${Date.now()}-${req.file.originalname}`
+    `notificationImg/${Date.now()}-${req.file.originalname}`,
   );
 
   await uploadBytes(imgRef, req.file.buffer);
@@ -37,7 +37,7 @@ exports.create = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { notification } = req;
 
   return res.status(200).json({
@@ -45,14 +45,14 @@ exports.findOne = catchAsync(async (req, res, next) => {
     notification,
   });
 });
-exports.update = catchAsync(async (req, res) => {
+export const update = catchAsync(async (req, res) => {
   const { notification } = req;
   const { title } = req.body;
 
   if (req.file) {
     const imgRef = ref(
       storage,
-      `notificationImg/${Date.now()}-${req.file.originalname}`
+      `notificationImg/${Date.now()}-${req.file.originalname}`,
     );
 
     await uploadBytes(imgRef, req.file.buffer);
@@ -75,7 +75,7 @@ exports.update = catchAsync(async (req, res) => {
     notification,
   });
 });
-exports.delete = catchAsync(async (req, res) => {
+export const remove = catchAsync(async (req, res) => {
   const { notification } = req;
 
   await notification.destroy();

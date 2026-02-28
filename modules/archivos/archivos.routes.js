@@ -1,20 +1,21 @@
-const express = require('express');
-const { upload } = require('../../utils/multer');
+import express from 'express';
+import { upload } from '../../utils/multer.js';
 
-const archivosController = require('./archivos.controller');
-const archivosMiddleware = require('./archivos.middleware');
-const classroomMiddleware = require('../../middlewares/classroom.middleware');
-const authMiddleware = require('../../middlewares/auth.middleware');
+import * as archivosController from './archivos.controller.js';
+import * as archivosMiddleware from './archivos.middleware.js';
+import * as classroomMiddleware from '../../middlewares/classroom.middleware.js';
+import * as authMiddleware from '../../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 router.use(authMiddleware.protect);
 
 router.get('/', archivosController.findAll);
+
 router.get(
   '/classroom/:id',
   classroomMiddleware.validExistClassroom,
-  archivosController.findAllClassroom
+  archivosController.findAllClassroom,
 );
 
 router
@@ -22,14 +23,17 @@ router
   .post(
     upload.single('file'),
     classroomMiddleware.validExistClassroom,
-    archivosController.create
+    archivosController.create,
   )
   .get(archivosMiddleware.validExistArchivo, archivosController.findOne)
   .patch(
     upload.single('file'),
     archivosMiddleware.validExistArchivo,
-    archivosController.update
+    archivosController.update,
   )
-  .delete(archivosMiddleware.validExistArchivo, archivosController.delete);
+  .delete(
+    archivosMiddleware.validExistArchivo,
+    archivosController.remove, // ojo: tu controller usa "remove" no "delete"
+  );
 
-module.exports = router;
+export default router;

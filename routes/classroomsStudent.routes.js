@@ -1,10 +1,9 @@
-const express = require('express');
+import express from 'express';
 
-const authMiddleware = require('../middlewares/auth.middleware');
-const studentMiddleware = require('../middlewares/student.middleware');
-
-const classroomsStudentController = require('../controllers/classroomsStudent.controller');
-const ClassroomsStudentMiddleware = require('../middlewares/classroomStudent.middleware');
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as studentMiddleware from '../middlewares/student.middleware.js';
+import * as classroomsStudentController from '../controllers/classroomsStudent.controller.js';
+import * as classroomsStudentMiddleware from '../middlewares/classroomStudent.middleware.js';
 
 const router = express.Router();
 
@@ -13,7 +12,7 @@ router.use(authMiddleware.protect);
 router.get(
   '/student/:id',
   studentMiddleware.validExistStudent,
-  classroomsStudentController.findAll
+  classroomsStudentController.findAll,
 );
 
 router.get('/exams/:id', classroomsStudentController.findAllExams);
@@ -25,16 +24,16 @@ router.post('/', classroomsStudentController.create);
 router
   .route('/:id')
   .get(
-    ClassroomsStudentMiddleware.validExistClassroomsStudentIncluide,
-    classroomsStudentController.findOne
+    classroomsStudentMiddleware.validExistClassroomsStudentIncluide,
+    classroomsStudentController.findOne,
   )
   .patch(
-    ClassroomsStudentMiddleware.validExistClassroomsStudent,
-    classroomsStudentController.update
+    classroomsStudentMiddleware.validExistClassroomsStudent,
+    classroomsStudentController.update,
   )
   .delete(
-    ClassroomsStudentMiddleware.validExistClassroomsStudent,
-    classroomsStudentController.delete
+    classroomsStudentMiddleware.validExistClassroomsStudent,
+    classroomsStudentController.remove,
   );
 
-module.exports = router;
+export default router;

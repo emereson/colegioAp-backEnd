@@ -1,8 +1,7 @@
-const Course = require('../models/course.model');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
-
-exports.validExistCourse = catchAsync(async (req, res, next) => {
+import Course from '../models/course.model.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
+export const validExistCourse = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const course = await Course.findOne({

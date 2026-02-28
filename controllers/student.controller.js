@@ -1,22 +1,24 @@
-const catchAsync = require('../utils/catchAsync');
-const bcrypt = require('bcryptjs');
-const generateJWT = require('../utils/jwt');
-const AppError = require('../utils/AppError');
-const Student = require('../models/student.model');
-const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
-const { storage } = require('../utils/firebase');
-const Classroom = require('../models/classroom.model');
-const Exam = require('../models/exams.model');
-const Course = require('../models/course.model');
-const Attendance = require('../models/attendance.model');
-const { Op } = require('sequelize');
-const Payments = require('../models/payments.model');
-const Observations = require('../models/observations.model');
-const Debts = require('../models/debts.model');
-const ClassroomsStudent = require('../models/classroomsStudents.model');
-const logger = require('../utils/logger');
+import catchAsync from '../utils/catchAsync.js';
+import bcrypt from 'bcryptjs';
+import generateJWT from '../utils/jwt.js';
+import AppError from '../utils/AppError.js';
+import Student from '../models/student.model.js';
 
-exports.findAll = catchAsync(async (req, res, next) => {
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+import Classroom from '../models/classroom.model.js';
+import Exam from '../models/exams.model.js';
+import Course from '../models/course.model.js';
+import Attendance from '../models/attendance.model.js';
+import { Op } from 'sequelize';
+import Payments from '../models/payments.model.js';
+import Observations from '../models/observations.model.js';
+import Debts from '../models/debts.model.js';
+import ClassroomsStudent from '../models/classroomsStudents.model.js';
+import logger from '../utils/logger.js';
+import storage from '../utils/firebase.js';
+
+export const findAll = catchAsync(async (req, res, next) => {
   const { name, aula } = req.query; // Aquí es donde recibimos el parámetro de búsqueda
 
   let whereFilter = {};
@@ -60,7 +62,7 @@ exports.findAll = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllLastName = catchAsync(async (req, res, next) => {
+export const findAllLastName = catchAsync(async (req, res, next) => {
   const { search } = req.query;
 
   const students = await Student.findAll({
@@ -86,7 +88,7 @@ exports.findAllLastName = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllClasroom = catchAsync(async (req, res, next) => {
+export const findAllClasroom = catchAsync(async (req, res, next) => {
   const { name } = req.query;
 
   const students = await Student.findAll({
@@ -108,7 +110,7 @@ exports.findAllClasroom = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllClasroomAttendance = catchAsync(async (req, res, next) => {
+export const findAllClasroomAttendance = catchAsync(async (req, res, next) => {
   const { name, date } = req.query;
 
   const students = await Student.findAll({
@@ -132,7 +134,7 @@ exports.findAllClasroomAttendance = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllClassroomExam = catchAsync(async (req, res, next) => {
+export const findAllClassroomExam = catchAsync(async (req, res, next) => {
   const { name } = req.query;
 
   const students = await Student.findAll({
@@ -157,7 +159,7 @@ exports.findAllClassroomExam = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllClassroomExamName = catchAsync(async (req, res, next) => {
+export const findAllClassroomExamName = catchAsync(async (req, res, next) => {
   const { name, nameExam } = req.query;
 
   const students = await Student.findAll({
@@ -193,7 +195,7 @@ exports.findAllClassroomExamName = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllClasroomStudent = catchAsync(async (req, res, next) => {
+export const findAllClasroomStudent = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const classroom = await Classroom.findAll({
@@ -209,7 +211,7 @@ exports.findAllClasroomStudent = catchAsync(async (req, res, next) => {
     classroom,
   });
 });
-exports.signup = catchAsync(async (req, res, next) => {
+export const signup = catchAsync(async (req, res, next) => {
   const { name, lastName, dni, phoneNumber, password } = req.body;
 
   // Verificar existencia de dni y phoneNumber en paralelo
@@ -227,8 +229,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     return next(
       new AppError(
         `El número de teléfono ${phoneNumber} ya está registrado.`,
-        409
-      )
+        409,
+      ),
     );
   }
 
@@ -248,7 +250,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 
       const imgRef = ref(
         storage,
-        `studentImg/${Date.now()}-${req.file.originalname}`
+        `studentImg/${Date.now()}-${req.file.originalname}`,
       );
 
       await uploadBytes(imgRef, req.file.buffer);
@@ -282,7 +284,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     },
   });
 });
-exports.login = catchAsync(async (req, res, next) => {
+export const login = catchAsync(async (req, res, next) => {
   const { dni, password } = req.body;
 
   const student = await Student.findOne({
@@ -308,7 +310,7 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { student } = req;
 
   return res.status(200).json({
@@ -317,7 +319,7 @@ exports.findOne = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.update = catchAsync(async (req, res) => {
+export const update = catchAsync(async (req, res) => {
   const { student } = req;
   const { name, lastName, dni, status, phoneNumber, password } = req.body;
 
@@ -340,7 +342,7 @@ exports.update = catchAsync(async (req, res) => {
   if (req.file) {
     const imgRef = ref(
       storage,
-      `studentImg/${Date.now()}-${req.file.originalname}`
+      `studentImg/${Date.now()}-${req.file.originalname}`,
     );
 
     await uploadBytes(imgRef, req.file.buffer);
@@ -360,7 +362,7 @@ exports.update = catchAsync(async (req, res) => {
   });
 });
 
-exports.delete = catchAsync(async (req, res) => {
+export const remove = catchAsync(async (req, res) => {
   const { student } = req;
 
   await student.destroy();

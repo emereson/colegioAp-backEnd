@@ -1,36 +1,37 @@
-const express = require('express');
-const { upload } = require('../../utils/multer');
+import express from 'express';
+import { upload } from '../../utils/multer.js';
 
-const studentFilesController = require('./studentFiles.controller');
-const studentFilesMiddleware = require('./studentFiles.middleware');
-const classroomStudentMiddleware = require('../../middlewares/classroomStudent.middleware');
-const authMiddleware = require('../../middlewares/auth.middleware');
+import * as studentFilesController from './studentFiles.controller.js';
+import * as studentFilesMiddleware from './studentFiles.middleware.js';
+import * as classroomStudentMiddleware from '../../middlewares/classroomStudent.middleware.js';
+import * as authMiddleware from '../../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 router.use(authMiddleware.protect);
 
 router.get('/', studentFilesController.findAll);
+
 router.get(
   '/classroom/:id',
   classroomStudentMiddleware.validExistClassroomsStudent,
-  studentFilesController.findAllClassroom
+  studentFilesController.findAllClassroom,
 );
 
 router
   .route('/:id')
   .get(
     studentFilesMiddleware.validExistStudentFiles,
-    studentFilesController.findOne
+    studentFilesController.findOne,
   )
   .patch(
     upload.single('file'),
     studentFilesMiddleware.validExistStudentFiles,
-    studentFilesController.update
+    studentFilesController.update,
   )
   .delete(
     studentFilesMiddleware.validExistStudentFiles,
-    studentFilesController.delete
+    studentFilesController.remove,
   );
 
-module.exports = router;
+export default router;

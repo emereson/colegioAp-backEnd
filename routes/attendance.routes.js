@@ -1,29 +1,23 @@
-const express = require('express');
+import express from 'express';
 
-const attemndanceMiddleware = require('../middlewares/attendance.middleware');
-const authMiddleware = require('../middlewares/auth.middleware');
-const classroomMiddleware = require('../middlewares/classroom.middleware');
+import * as attendanceMiddleware from '../middlewares/attendance.middleware.js';
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as classroomMiddleware from '../middlewares/classroom.middleware.js';
 
-const attemndanceController = require('../controllers/attendance.controller');
+import * as attendanceController from '../controllers/attendance.controller.js';
 
 const router = express.Router();
 
 router.use(authMiddleware.protect);
 
-router.get('/', attemndanceController.findAll);
-router.get('/classroom/:id/:fecha', attemndanceController.findAllAttendance);
-router.post('/classroom', attemndanceController.createsOrUpdates);
+router.get('/', attendanceController.findAll);
+router.get('/classroom/:id/:fecha', attendanceController.findAllAttendance);
+router.post('/classroom', attendanceController.createsOrUpdates);
 
 router
   .route('/:id')
-  .post(classroomMiddleware.validExistClassroom, attemndanceController.create)
-  .patch(
-    attemndanceMiddleware.validExistAttendance,
-    attemndanceController.update
-  )
-  .get(
-    attemndanceMiddleware.validExistAttendance,
-    attemndanceController.findOne
-  );
+  .post(classroomMiddleware.validExistClassroom, attendanceController.create)
+  .patch(attendanceMiddleware.validExistAttendance, attendanceController.update)
+  .get(attendanceMiddleware.validExistAttendance, attendanceController.findOne);
 
-module.exports = router;
+export default router;

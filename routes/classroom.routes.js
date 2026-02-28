@@ -1,9 +1,8 @@
-const express = require('express');
+import express from 'express';
 
-const classroomMiddleware = require('../middlewares/classroom.middleware');
-const authMiddleware = require('../middlewares/auth.middleware');
-
-const classroomController = require('../controllers/classroom.controller');
+import * as classroomMiddleware from '../middlewares/classroom.middleware.js';
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as classroomController from '../controllers/classroom.controller.js';
 
 const router = express.Router();
 
@@ -17,6 +16,6 @@ router
   .route('/:id')
   .get(classroomMiddleware.validExistClassroom, classroomController.findOne)
   .patch(classroomMiddleware.validExistClassroom, classroomController.update)
-  .delete(classroomMiddleware.validExistClassroom, classroomController.delete);
+  .delete(classroomMiddleware.validExistClassroom, classroomController.remove);
 
-module.exports = router;
+export default router;

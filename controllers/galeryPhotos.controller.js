@@ -1,10 +1,10 @@
-const catchAsync = require('../utils/catchAsync');
-const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
-const { storage } = require('../utils/firebase');
-const GaleryPhotosImg = require('../models/galeryPhotosImg');
-const GaleryPhotos = require('../models/galeryPhotos.model');
+import catchAsync from '../utils/catchAsync.js';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import GaleryPhotosImg from '../models/galeryPhotosImg.js';
+import GaleryPhotos from '../models/galeryPhotos.model.js';
+import storage from '../utils/firebase.js';
 
-exports.findAll = catchAsync(async (req, res, next) => {
+export const findAll = catchAsync(async (req, res, next) => {
   const galeryPhotos = await GaleryPhotos.findAll({
     include: [
       {
@@ -19,7 +19,7 @@ exports.findAll = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { galeryPhotos } = req;
 
   return res.status(200).json({
@@ -28,7 +28,7 @@ exports.findOne = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.create = catchAsync(async (req, res, next) => {
+export const create = catchAsync(async (req, res, next) => {
   const { name } = req.body;
 
   const galeryPhotos = await GaleryPhotos.create({
@@ -37,7 +37,7 @@ exports.create = catchAsync(async (req, res, next) => {
   const galleryImgsPromises = req.files.map(async (file) => {
     const imgRef = ref(
       storage,
-      `galleryImgUrl/${Date.now()}-${file.originalname}`
+      `galleryImgUrl/${Date.now()}-${file.originalname}`,
     );
     await uploadBytes(imgRef, file.buffer);
 
@@ -58,7 +58,7 @@ exports.create = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.delete = catchAsync(async (req, res, next) => {
+export const remove = catchAsync(async (req, res, next) => {
   const { galeryPhotos } = req;
 
   await galeryPhotos.destroy();

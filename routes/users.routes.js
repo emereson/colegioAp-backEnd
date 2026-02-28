@@ -1,9 +1,8 @@
-const express = require('express');
+import express from 'express';
 
-const userMiddleware = require('../middlewares/user.middleware');
-const authMiddleware = require('../middlewares/auth.middleware');
-
-const userController = require('../controllers/user.controllers');
+import * as userMiddleware from '../middlewares/user.middleware.js';
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as userController from '../controllers/user.controllers.js';
 
 const router = express.Router();
 
@@ -15,7 +14,7 @@ router.get('/', userController.findAll);
 router
   .route('/:id')
   .patch(userMiddleware.validExistUser, userController.update)
-  .delete(userMiddleware.validExistUser, userController.delete)
+  .delete(userMiddleware.validExistUser, userController.remove)
   .get(userMiddleware.validExistUser, userController.findOne);
 
-module.exports = router;
+export default router;

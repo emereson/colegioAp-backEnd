@@ -1,8 +1,8 @@
-const Calendar = require('../models/calendar.model');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
+import Calendar from '../models/calendar.model.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
 
-exports.validExistCalendar = catchAsync(async (req, res, next) => {
+export const validExistCalendar = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const calendar = await Calendar.findOne({

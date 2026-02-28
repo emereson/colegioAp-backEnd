@@ -1,13 +1,13 @@
-const express = require('express');
-const { Client, NoAuth } = require('whatsapp-web.js');
-const puppeteer = require('puppeteer');
-const qrcode = require('qrcode');
-const logger = require('../utils/logger');
+import express from 'express';
+import { Client } from 'whatsapp-web.js';
+import puppeteer from 'puppeteer';
+import qrcode from 'qrcode';
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 
-const clientWhatsApp = new Client({
-  authStrategy: new NoAuth(),
+export const clientWhatsApp = new Client({
+  // authStrategy: new NoAuth(),
   puppeteer: {
     executablePath: puppeteer.executablePath(),
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -15,7 +15,7 @@ const clientWhatsApp = new Client({
 });
 
 let isAuthenticated = false;
-let lastQRCode = null; // <--- Guardamos el QR aquí
+let lastQRCode = null;
 
 // Inicialización única del cliente
 const initializeClient = (() => {
@@ -32,7 +32,7 @@ const initializeClient = (() => {
 
 router.use(initializeClient);
 
-// EVENTOS una sola vez (fuera de los endpoints)
+// EVENTOS
 clientWhatsApp.on('authenticated', () => {
   isAuthenticated = true;
   logger.info('✅ Cliente autenticado.');
@@ -57,7 +57,7 @@ clientWhatsApp.on('qr', async (qr) => {
   }
 });
 
-// ENDPOINT para obtener el código QR
+// ENDPOINT QR
 router.get('/qr', (req, res) => {
   if (isAuthenticated) {
     return res.json({
@@ -79,13 +79,13 @@ router.get('/qr', (req, res) => {
   });
 });
 
-// ENDPOINT para verificar el estado de autenticación
+// ENDPOINT estado
 router.get('/check-auth', (req, res) => {
   res.send(
     isAuthenticated
       ? 'El cliente ya está vinculado con WhatsApp.'
-      : 'El cliente no está vinculado. Por favor, escanee el código QR.'
+      : 'El cliente no está vinculado. Por favor, escanee el código QR.',
   );
 });
 
-module.exports = { vincularWspRouter: router, clientWhatsApp };
+export default router;

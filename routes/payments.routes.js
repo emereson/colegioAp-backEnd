@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 
-const paymentsMiddleware = require('../middlewares/payments.middleware');
-const authMiddleware = require('../middlewares/auth.middleware');
-const classroomsStudentMiddleware = require('../middlewares/classroomStudent.middleware');
+import * as paymentsMiddleware from '../middlewares/payments.middleware.js';
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as classroomsStudentMiddleware from '../middlewares/classroomStudent.middleware.js';
 
-const paymentsController = require('../controllers/payments.controller');
+import * as paymentsController from '../controllers/payments.controller.js';
 
 const router = express.Router();
 
@@ -16,11 +16,12 @@ router
   .route('/:id')
   .post(
     classroomsStudentMiddleware.validExistClassroomsStudent,
-    paymentsController.create
+    paymentsController.create,
   )
   .patch(paymentsMiddleware.validExistPay, paymentsController.update)
-  .delete(paymentsMiddleware.validExistPay, paymentsController.delete)
+  .delete(paymentsMiddleware.validExistPay, paymentsController.remove)
   .get(paymentsMiddleware.validExistPay, paymentsController.findOne);
 
 router.get('/student/:id', paymentsController.findAll);
-module.exports = router;
+
+export default router;

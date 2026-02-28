@@ -1,12 +1,12 @@
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/AppError');
-const ClassroomsStudent = require('../models/classroomsStudents.model');
-const Classroom = require('../models/classroom.model');
-const Exam = require('../models/exams.model');
-const Course = require('../models/course.model');
-const Student = require('../models/student.model');
+import catchAsync from '../utils/catchAsync.js';
 
-exports.findAll = catchAsync(async (req, res, next) => {
+import ClassroomsStudent from '../models/classroomsStudents.model.js';
+import Classroom from '../models/classroom.model.js';
+import Exam from '../models/exams.model.js';
+import Course from '../models/course.model.js';
+import Student from '../models/student.model.js';
+
+export const findAll = catchAsync(async (req, res, next) => {
   const { student } = req;
 
   const classroomsStudent = await ClassroomsStudent.findAll({
@@ -21,7 +21,7 @@ exports.findAll = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllExams = catchAsync(async (req, res, next) => {
+export const findAllExams = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const classroomsStudents = await ClassroomsStudent.findAll({
@@ -32,9 +32,7 @@ exports.findAllExams = catchAsync(async (req, res, next) => {
         required: false,
       },
     ],
-    order: [
-      [{ model: Exam }, 'name', 'DESC'], // Esta es la forma correcta de ordenar modelos incluidos
-    ],
+    order: [[{ model: Exam }, 'name', 'DESC']],
   });
 
   if (!classroomsStudents.length) {
@@ -57,7 +55,7 @@ exports.findAllExams = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllNotas = catchAsync(async (req, res, next) => {
+export const findAllNotas = catchAsync(async (req, res, next) => {
   const { id, nameExam } = req.params;
 
   const classroomsStudents = await ClassroomsStudent.findAll({
@@ -82,7 +80,6 @@ exports.findAllNotas = catchAsync(async (req, res, next) => {
     ],
   });
 
-  // Encontrar el estudiante con más cursos (sumando todos los exams -> courses)
   let estudianteMax = null;
   let maxCursosCount = -1;
 
@@ -112,7 +109,7 @@ exports.findAllNotas = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.create = catchAsync(async (req, res, next) => {
+export const create = catchAsync(async (req, res, next) => {
   const { student_id, classroom_id } = req.body;
 
   const classroom = await ClassroomsStudent.create({
@@ -127,7 +124,7 @@ exports.create = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { classroom } = req;
 
   return res.status(200).json({
@@ -136,12 +133,11 @@ exports.findOne = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.update = catchAsync(async (req, res, next) => {
+export const update = catchAsync(async (req, res, next) => {
   const { classroom } = req;
-
   const { name, tutor } = req.body;
 
-  await classroom.create({
+  await classroom.update({
     name,
     tutor,
   });
@@ -153,14 +149,14 @@ exports.update = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.delete = catchAsync(async (req, res, next) => {
+export const remove = catchAsync(async (req, res, next) => {
   const { classroom } = req;
 
   await classroom.destroy();
 
   return res.status(200).json({
     status: 'success',
-    message: 'the classroom has been delete',
+    message: 'the classroom has been deleted',
     classroom,
   });
 });

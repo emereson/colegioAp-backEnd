@@ -1,9 +1,9 @@
-const catchAsync = require('../utils/catchAsync');
-const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
-const { storage } = require('../utils/firebase');
-const Calendar = require('../models/calendar.model');
+import catchAsync from '../utils/catchAsync.js';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import storage from '../utils/firebase.js';
+import Calendar from '../models/calendar.model.js';
 
-exports.findAll = catchAsync(async (req, res, next) => {
+export const findAll = catchAsync(async (req, res, next) => {
   const calendars = await Calendar.findAll();
 
   return res.status(200).json({
@@ -13,12 +13,12 @@ exports.findAll = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.create = catchAsync(async (req, res, next) => {
+export const create = catchAsync(async (req, res, next) => {
   const { name } = req.body;
 
   const imgRef = ref(
     storage,
-    `calendarImg/${Date.now()}-${req.file.originalname}`
+    `calendarImg/${Date.now()}-${req.file.originalname}`,
   );
 
   await uploadBytes(imgRef, req.file.buffer);
@@ -37,7 +37,7 @@ exports.create = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { calendar } = req;
 
   return res.status(200).json({
@@ -45,13 +45,13 @@ exports.findOne = catchAsync(async (req, res, next) => {
     calendar,
   });
 });
-exports.update = catchAsync(async (req, res) => {
+export const update = catchAsync(async (req, res) => {
   const { calendar } = req;
   const { name } = req.body;
 
   const imgRef = ref(
     storage,
-    `calendarImg/${Date.now()}-${req.file.originalname}`
+    `calendarImg/${Date.now()}-${req.file.originalname}`,
   );
 
   await uploadBytes(imgRef, req.file.buffer);
@@ -69,7 +69,7 @@ exports.update = catchAsync(async (req, res) => {
     calendar,
   });
 });
-exports.delete = catchAsync(async (req, res) => {
+export const remove = catchAsync(async (req, res) => {
   const { calendar } = req;
 
   await calendar.destroy();

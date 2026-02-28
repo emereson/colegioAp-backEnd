@@ -1,8 +1,8 @@
-const AppError = require('../../utils/AppError');
-const catchAsync = require('../../utils/catchAsync');
-const Archivo = require('./archivos.model');
+import AppError from '../../utils/AppError.js';
+import catchAsync from '../../utils/catchAsync.js';
+import Archivo from './archivos.model.js';
 
-exports.validExistArchivo = catchAsync(async (req, res, next) => {
+export const validExistArchivo = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const archivo = await Archivo.findOne({

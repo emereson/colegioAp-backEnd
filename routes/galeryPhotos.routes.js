@@ -1,10 +1,9 @@
-const express = require('express');
-const { upload } = require('../utils/multer');
+import express from 'express';
+import { upload } from '../utils/multer.js';
 
-const galeryPhotosMiddleware = require('../middlewares/galeryPhotos.middleware');
-const authMiddleware = require('../middlewares/auth.middleware');
-
-const galeryPhotosController = require('../controllers/galeryPhotos.controller');
+import * as galeryPhotosMiddleware from '../middlewares/galeryPhotos.middleware.js';
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as galeryPhotosController from '../controllers/galeryPhotos.controller.js';
 
 const router = express.Router();
 
@@ -15,19 +14,18 @@ router.get('/', galeryPhotosController.findAll);
 router.post(
   '/',
   upload.array('galleryImgUrl', 50),
-  galeryPhotosController.create
+  galeryPhotosController.create,
 );
 
 router
   .route('/:id')
-
   .delete(
     galeryPhotosMiddleware.validExistGaleryPhotos,
-    galeryPhotosController.delete
+    galeryPhotosController.remove,
   )
   .get(
     galeryPhotosMiddleware.validExistGaleryPhotos,
-    galeryPhotosController.findOne
+    galeryPhotosController.findOne,
   );
 
-module.exports = router;
+export default router;

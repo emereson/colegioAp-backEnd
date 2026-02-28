@@ -1,14 +1,13 @@
-const catchAsync = require('../utils/catchAsync');
-const Debts = require('../models/debts.model');
-const { clientWhatsApp } = require('../utils/whatsapp');
-const Student = require('../models/student.model');
-const { Op } = require('sequelize');
-const logger = require('../utils/logger');
+import catchAsync from '../utils/catchAsync.js';
+import Debts from '../models/debts.model.js';
+import Student from '../models/student.model.js';
+import { Op } from 'sequelize';
+import logger from '../utils/logger.js';
 
-exports.findAllStudents = catchAsync(async (req, res, next) => {
+export const findAllStudents = catchAsync(async (req, res, next) => {
   const { search } = req.query;
 
-  // Si search está vacío o no contiene letras, devolver array vacío
+  // Si search está vacío devolver array vacío
   if (!search || search.trim() === '') {
     return res.status(200).json({
       status: 'Success',
@@ -38,7 +37,7 @@ exports.findAllStudents = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllStudent = catchAsync(async (req, res, next) => {
+export const findAllStudent = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const debts = await Debts.findAll({
@@ -54,7 +53,7 @@ exports.findAllStudent = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.create = catchAsync(async (req, res, next) => {
+export const create = catchAsync(async (req, res, next) => {
   const { student } = req;
   const { name, amount, notificationWhatsApp } = req.body;
 
@@ -63,9 +62,10 @@ exports.create = catchAsync(async (req, res, next) => {
     name,
     amount,
   });
+
   if (notificationWhatsApp) {
-    const message = `Se le comunica que se ha registrado una deuda por concepto de ${name} ascendente al monto de ${amount} En nuestro sistema. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/
-      `;
+    const message = `Se le comunica que se ha registrado una deuda por concepto de ${name} ascendente al monto de ${amount}. 
+Para mayor detalle puede ingresar a: https://alipioponce.com/`;
 
     const numberWhatsApp = `+51${student.phoneNumber}`;
     const chatId = numberWhatsApp.substring(1) + '@c.us';
@@ -77,14 +77,15 @@ exports.create = catchAsync(async (req, res, next) => {
       logger.info('mensaje enviado');
     }
   }
+
   res.status(201).json({
     status: 'success',
-    message: 'the debt has ben created successfully!',
+    message: 'the debt has been created successfully!',
     debt,
   });
 });
 
-exports.update = catchAsync(async (req, res) => {
+export const update = catchAsync(async (req, res) => {
   const { debt } = req;
   const { name, amount, status } = req.body;
 
@@ -96,12 +97,12 @@ exports.update = catchAsync(async (req, res) => {
 
   return res.status(200).json({
     status: 'success',
-    message: 'debt  has been updated',
+    message: 'debt has been updated',
     debt,
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { debt } = req;
 
   return res.status(200).json({
@@ -110,7 +111,7 @@ exports.findOne = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.delete = catchAsync(async (req, res) => {
+export const remove = catchAsync(async (req, res) => {
   const { debt } = req;
 
   await debt.destroy();

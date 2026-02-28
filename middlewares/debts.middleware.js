@@ -1,8 +1,8 @@
-const Debts = require('../models/debts.model');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
+import Debts from '../models/debts.model.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
 
-exports.validExistDebt = catchAsync(async (req, res, next) => {
+export const validExistDebt = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const debt = await Debts.findOne({

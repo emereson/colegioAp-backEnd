@@ -1,13 +1,13 @@
-const catchAsync = require('../utils/catchAsync');
-const Payments = require('../models/payments.model');
-const { clientWhatsApp } = require('../utils/whatsapp');
-const Student = require('../models/student.model');
-const { Op } = require('sequelize');
-const ClassroomsStudent = require('../models/classroomsStudents.model');
-const Classroom = require('../models/classroom.model');
-const logger = require('../utils/logger');
+import catchAsync from '../utils/catchAsync.js';
+import Payments from '../models/payments.model.js';
+import Student from '../models/student.model.js';
+import { Op } from 'sequelize';
+import ClassroomsStudent from '../models/classroomsStudents.model.js';
+import Classroom from '../models/classroom.model.js';
+import logger from '../utils/logger.js';
+import { clientWhatsApp } from '../routes/vincularWsp.js';
 
-exports.findAllStudents = catchAsync(async (req, res, next) => {
+export const findAllStudents = catchAsync(async (req, res, next) => {
   const { search } = req.query;
 
   // Si search está vacío o no contiene letras, devolver array vacío
@@ -48,7 +48,7 @@ exports.findAllStudents = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAll = catchAsync(async (req, res, next) => {
+export const findAll = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const payments = await Payments.findAll({
     where: {
@@ -63,7 +63,7 @@ exports.findAll = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.create = catchAsync(async (req, res, next) => {
+export const create = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { name, date, amount, student, notificationWhatsApp } = req.body;
 
@@ -105,7 +105,7 @@ exports.create = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.update = catchAsync(async (req, res) => {
+export const update = catchAsync(async (req, res) => {
   const { pay } = req;
   const { name, date, amount } = req.body;
 
@@ -122,7 +122,7 @@ exports.update = catchAsync(async (req, res) => {
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { pay } = req;
 
   return res.status(200).json({
@@ -131,7 +131,7 @@ exports.findOne = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.delete = catchAsync(async (req, res) => {
+export const remove = catchAsync(async (req, res) => {
   const { pay } = req;
 
   await pay.destroy();

@@ -1,14 +1,17 @@
-const Attendance = require('./attendance.model');
-const Classroom = require('./classroom.model');
-const ClassroomsStudent = require('./classroomsStudents.model');
-const Exam = require('./exams.model');
-const Debts = require('./debts.model');
-const Course = require('./course.model');
-const GaleryPhotos = require('./galeryPhotos.model');
-const GaleryPhotosImg = require('./galeryPhotosImg');
-const Observations = require('./observations.model');
-const Payments = require('./payments.model');
-const Student = require('./student.model');
+import Attendance from './attendance.model.js';
+import Classroom from './classroom.model.js';
+import ClassroomsStudent from './classroomsStudents.model.js';
+import Exam from './exams.model.js';
+import Debts from './debts.model.js';
+import Course from './course.model.js';
+import GaleryPhotos from './galeryPhotos.model.js';
+import GaleryPhotosImg from './galeryPhotosImg.js';
+import Observations from './observations.model.js';
+import Payments from './payments.model.js';
+import Student from './student.model.js';
+import SemanaEvaluacion from '../modules/evaluaciones/semanaEvaluacion/semanaEvaluacion.model.js';
+import Evaluaciones from '../modules/evaluaciones/evaluacion/evaluacion.model.js';
+import PreguntaEvaluacion from '../modules/evaluaciones/preguntasEvaluacion/preguntaEvaluacion.model.js';
 
 const initModel = () => {
   Student.hasMany(Observations, { foreignKey: 'studentId' });
@@ -45,6 +48,42 @@ const initModel = () => {
 
   GaleryPhotos.hasMany(GaleryPhotosImg, { foreignKey: 'galeryPhotosId' });
   GaleryPhotosImg.belongsTo(GaleryPhotos, { foreignKey: 'galeryPhotosId' });
+
+  Classroom.hasMany(SemanaEvaluacion, {
+    foreignKey: 'aula_id',
+    as: 'semanas_evaluaciones',
+  });
+  SemanaEvaluacion.belongsTo(Classroom, {
+    foreignKey: 'aula_id',
+    as: 'aula',
+  });
+
+  Classroom.hasMany(Evaluaciones, {
+    foreignKey: 'aula_id',
+    as: 'evaluaciones',
+  });
+  Evaluaciones.belongsTo(Classroom, {
+    foreignKey: 'aula_id',
+    as: 'aula',
+  });
+
+  SemanaEvaluacion.hasMany(Evaluaciones, {
+    foreignKey: 'semana_id',
+    as: 'evaluaciones',
+  });
+  Evaluaciones.belongsTo(SemanaEvaluacion, {
+    foreignKey: 'semana_id',
+    as: 'semana_evaluacion',
+  });
+
+  Evaluaciones.hasMany(PreguntaEvaluacion, {
+    foreignKey: 'evaluacion_id',
+    as: 'preguntas_evaluacion',
+  });
+  PreguntaEvaluacion.belongsTo(Evaluaciones, {
+    foreignKey: 'evaluacion_id',
+    as: 'evaluacion',
+  });
 };
 
-module.exports = initModel;
+export default initModel;

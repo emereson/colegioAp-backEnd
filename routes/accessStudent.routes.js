@@ -1,73 +1,73 @@
-const express = require('express');
+import express from 'express';
+import { upload } from '../utils/multer.js';
 
-const studentMiddleware = require('../middlewares/student.middleware');
-const accesStudentController = require('../controllers/accesStudent.controller');
-
-const calendarController = require('../controllers/calendar.controller');
-const studentController = require('../controllers/student.controller');
-const notificationsController = require('../controllers/notifications.controller');
-const galeryPhotosController = require('../controllers/galeryPhotos.controller');
-const classroomsStudentController = require('../middlewares/classroomStudent.middleware');
-const classroomMiddleware = require('../middlewares/classroom.middleware');
-const classroomStudentMiddleware = require('../middlewares/classroomStudent.middleware');
-const { upload } = require('../utils/multer');
+import * as studentMiddleware from '../middlewares/student.middleware.js';
+import * as accesStudentController from '../controllers/accesStudent.controller.js';
+import * as calendarController from '../controllers/calendar.controller.js';
+import * as studentController from '../controllers/student.controller.js';
+import * as notificationsController from '../controllers/notifications.controller.js';
+import * as galeryPhotosController from '../controllers/galeryPhotos.controller.js';
+import * as classroomStudentMiddleware from '../middlewares/classroomStudent.middleware.js';
+import * as classroomMiddleware from '../middlewares/classroom.middleware.js';
 
 const router = express.Router();
 
 router.get('/gallery', galeryPhotosController.findAll);
 router.post('/login', studentController.login);
+
 router.use(studentMiddleware.protect);
 
 router.get(
   '/attendance/:id',
-  classroomsStudentController.validExistClassroomsStudent,
-  accesStudentController.findAllAttendances
+  classroomStudentMiddleware.validExistClassroomsStudent,
+  accesStudentController.findAllAttendances,
 );
 
 router.get(
   '/exams/:id',
-  classroomsStudentController.validExistClassroomsStudent,
-  accesStudentController.findAllExams
+  classroomStudentMiddleware.validExistClassroomsStudent,
+  accesStudentController.findAllExams,
 );
 
 router.get(
   '/pays/:id',
-  classroomsStudentController.validExistClassroomsStudent,
-  accesStudentController.findAllPays
+  classroomStudentMiddleware.validExistClassroomsStudent,
+  accesStudentController.findAllPays,
 );
 
 router.get(
   '/debts/:id',
   studentMiddleware.validExistStudent,
-  accesStudentController.findAllDebts
+  accesStudentController.findAllDebts,
 );
 
 router.get(
   '/files/:id',
   classroomMiddleware.validExistClassroom,
-  accesStudentController.findAllFiles
+  accesStudentController.findAllFiles,
 );
 
 router.get(
   '/student-files/:id',
   classroomStudentMiddleware.validExistClassroomsStudent,
-  accesStudentController.findAllStudentFiles
+  accesStudentController.findAllStudentFiles,
 );
 
 router.post(
   '/student-files/:id',
   upload.single('file'),
   classroomStudentMiddleware.validExistClassroomsStudent,
-  accesStudentController.createdStudentFile
+  accesStudentController.createdStudentFile,
 );
 
 router.get('/notifications', notificationsController.findAll);
 router.get('/calendar', calendarController.findAll);
+
 router.get(
   '/:id',
   studentMiddleware.validExistStudent2,
   studentMiddleware.protectAccountOwner,
-  studentController.findOne
+  studentController.findOne,
 );
 
-module.exports = router;
+export default router;

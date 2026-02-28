@@ -1,9 +1,9 @@
-const Observations = require('../models/observations.model');
-const Student = require('../models/student.model');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
+import Observations from '../models/observations.model.js';
+import Student from '../models/student.model.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
 
-exports.validExistObservations = catchAsync(async (req, res, next) => {
+export const validExistObservations = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const observation = await Observations.findOne({

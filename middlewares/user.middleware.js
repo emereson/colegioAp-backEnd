@@ -1,8 +1,8 @@
-const User = require('../models/user.model');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
+import User from '../models/user.model.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
 
-exports.validExistUser = catchAsync(async (req, res, next) => {
+export const validExistUser = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const user = await User.findOne({

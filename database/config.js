@@ -1,4 +1,4 @@
-const { Sequelize } = require('sequelize');
+import { Sequelize } from 'sequelize';
 
 const db = new Sequelize({
   dialect: process.env.DB_DIALECT,
@@ -11,14 +11,13 @@ const db = new Sequelize({
   pool: {
     max: 10,
     min: 0,
-    acquire: 120000, // Aumentado a 120 segundos
+    acquire: 120000,
     idle: 10000,
   },
   dialectOptions: {
-    // Para PostgreSQL
-    statement_timeout: 300000, // 5 minutos en ms
-    query_timeout: 300000, // 5 minutos en ms
+    statement_timeout: 300000,
+    query_timeout: 300000,
   },
 });
 
-module.exports = { db };
+export default db;

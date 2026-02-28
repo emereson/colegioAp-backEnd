@@ -1,8 +1,8 @@
-const Exam = require('../models/exams.model');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
+import Exam from '../models/exams.model.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
 
-exports.validExistExam = catchAsync(async (req, res, next) => {
+export const validExistExam = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const exam = await Exam.findOne({

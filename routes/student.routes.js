@@ -1,10 +1,9 @@
-const express = require('express');
-const { upload } = require('../utils/multer');
+import express from 'express';
+import { upload } from '../utils/multer.js';
 
-const studentMiddleware = require('../middlewares/student.middleware');
-const authMiddleware = require('../middlewares/auth.middleware');
-
-const studentController = require('../controllers/student.controller');
+import * as studentMiddleware from '../middlewares/student.middleware.js';
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as studentController from '../controllers/student.controller.js';
 
 const router = express.Router();
 
@@ -26,9 +25,9 @@ router
   .patch(
     upload.single('studentImg'),
     studentMiddleware.validExistStudent,
-    studentController.update
+    studentController.update,
   )
-  .delete(studentMiddleware.validExistStudent, studentController.delete)
+  .delete(studentMiddleware.validExistStudent, studentController.remove)
   .get(studentMiddleware.validExistStudent, studentController.findOne);
 
-module.exports = router;
+export default router;

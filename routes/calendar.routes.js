@@ -1,9 +1,9 @@
-const express = require('express');
-const { upload } = require('../utils/multer');
+import express from 'express';
+import { upload } from '../utils/multer.js';
 
-const calendarMiddleware = require('../middlewares/calendar.middleware');
-const authMiddleware = require('../middlewares/auth.middleware');
-const calendarController = require('../controllers/calendar.controller');
+import * as calendarMiddleware from '../middlewares/calendar.middleware.js';
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as calendarController from '../controllers/calendar.controller.js';
 
 const router = express.Router();
 
@@ -14,16 +14,12 @@ router.post('/', upload.single('calendarImg'), calendarController.create);
 
 router
   .route('/:id')
-  .get(
-    calendarMiddleware.validExistCalendar,
-
-    calendarController.findOne
-  )
+  .get(calendarMiddleware.validExistCalendar, calendarController.findOne)
   .patch(
     upload.single('calendarImg'),
     calendarMiddleware.validExistCalendar,
-    calendarController.update
+    calendarController.update,
   )
-  .delete(calendarMiddleware.validExistCalendar, calendarController.delete);
+  .delete(calendarMiddleware.validExistCalendar, calendarController.remove);
 
-module.exports = router;
+export default router;

@@ -1,14 +1,14 @@
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
-const Student = require('../models/student.model');
-const jwt = require('jsonwebtoken');
-const { promisify } = require('util');
-const Classroom = require('../models/classroom.model');
-const Observations = require('../models/observations.model');
-const Debts = require('../models/debts.model');
-const ClassroomsStudent = require('../models/classroomsStudents.model');
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
+import Student from '../models/student.model.js';
+import jwt from 'jsonwebtoken';
+import { promisify } from 'util';
+import Classroom from '../models/classroom.model.js';
+import Observations from '../models/observations.model.js';
+import Debts from '../models/debts.model.js';
+import ClassroomsStudent from '../models/classroomsStudents.model.js';
 
-exports.validExistStudent = catchAsync(async (req, res, next) => {
+export const validExistStudent = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const student = await Student.findOne({
@@ -24,7 +24,7 @@ exports.validExistStudent = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.validExistStudentIncluide = catchAsync(async (req, res, next) => {
+export const validExistStudentIncluide = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const student = await Student.findOne({
@@ -58,7 +58,7 @@ exports.validExistStudentIncluide = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.validExistStudent2 = catchAsync(async (req, res, next) => {
+export const validExistStudent2 = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const student = await Student.findOne({
@@ -86,7 +86,7 @@ exports.validExistStudent2 = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.protect = catchAsync(async (req, res, next) => {
+export const protect = catchAsync(async (req, res, next) => {
   let token;
   if (
     req.headers.authorization &&
@@ -97,13 +97,13 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   if (!token) {
     return next(
-      new AppError('You are not logged in!, Please log in to get access', 401)
+      new AppError('You are not logged in!, Please log in to get access', 401),
     );
   }
 
   const decoded = await promisify(jwt.verify)(
     token,
-    process.env.SECRET_JWT_SEED
+    process.env.SECRET_JWT_SEED,
   );
 
   const student = await Student.findOne({
@@ -114,22 +114,22 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   if (!student) {
     return next(
-      new AppError('The owner of this token is not longer available', 401)
+      new AppError('The owner of this token is not longer available', 401),
     );
   }
 
   if (student.passwordChangedAt) {
     const changedTimeStamp = parseInt(
       student.passwordChangedAt.getTime() / 1000,
-      10
+      10,
     );
 
     if (decoded.iat < changedTimeStamp) {
       return next(
         new AppError(
           'User recently changed password!, please login again.',
-          401
-        )
+          401,
+        ),
       );
     }
   }
@@ -139,7 +139,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.protectAccountOwner = catchAsync(async (req, res, next) => {
+export const protectAccountOwner = catchAsync(async (req, res, next) => {
   const { student, sessionUser } = req;
 
   if (student.id !== sessionUser.id) {
@@ -149,7 +149,7 @@ exports.protectAccountOwner = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.restrictTo = (...roles) => {
+export const restrictTo = (...roles) => {
   return (req, res, next) => {
     const { sessionUser } = req;
 
@@ -159,7 +159,7 @@ exports.restrictTo = (...roles) => {
 
     if (!roles.includes(sessionUser.role)) {
       return next(
-        new AppError('You do not have permission to perform this action!', 403)
+        new AppError('You do not have permission to perform this action!', 403),
       );
     }
 

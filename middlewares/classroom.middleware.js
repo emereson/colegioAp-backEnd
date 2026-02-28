@@ -1,9 +1,8 @@
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
+import Classroom from '../models/classroom.model.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
 
-const Classroom = require('../models/classroom.model');
-
-exports.validExistClassroom = catchAsync(async (req, res, next) => {
+export const validExistClassroom = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const classroom = await Classroom.findOne({

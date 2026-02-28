@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 
-const authMiddleware = require('../middlewares/auth.middleware');
-const courseMiddleware = require('../middlewares/course.middleware');
-const courseExamMiddleware = require('../middlewares/courseExam.middleware');
-const courseExamController = require('../controllers/courseExam.controller');
+import * as authMiddleware from '../middlewares/auth.middleware.js';
+import * as courseMiddleware from '../middlewares/course.middleware.js';
+import * as courseExamMiddleware from '../middlewares/courseExam.middleware.js';
+import * as courseExamController from '../controllers/courseExam.controller.js';
 
 const router = express.Router();
 
@@ -17,8 +17,8 @@ router
   .patch(courseExamMiddleware.validExistCourseExam, courseExamController.update)
   .delete(
     courseExamMiddleware.validExistCourseExam,
-    courseExamController.delete
+    courseExamController.remove,
   )
   .get(courseExamMiddleware.validExistCourseExam, courseExamController.findOne);
 
-module.exports = router;
+export default router;

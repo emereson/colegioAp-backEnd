@@ -1,4 +1,4 @@
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js';
 
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
@@ -36,4 +36,4 @@ const globalErrorHandler = (err, req, res, next) => {
   }
 };
 
-module.exports = globalErrorHandler;
+export default globalErrorHandler;

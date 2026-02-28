@@ -1,10 +1,10 @@
-const AppError = require('./../utils/AppError');
-const User = require('../models/user.model');
-const jwt = require('jsonwebtoken');
-const { promisify } = require('util');
-const catchAsync = require('./../utils/catchAsync');
+import AppError from './../utils/AppError.js';
+import User from '../models/user.model.js';
+import jwt from 'jsonwebtoken';
+import { promisify } from 'util';
+import catchAsync from './../utils/catchAsync.js';
 
-exports.protect = catchAsync(async (req, res, next) => {
+export const protect = catchAsync(async (req, res, next) => {
   let token;
 
   if (
@@ -16,13 +16,13 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   if (!token) {
     return next(
-      new AppError('You are not logged in!, Please log in to get access', 401)
+      new AppError('You are not logged in!, Please log in to get access', 401),
     );
   }
 
   const decoded = await promisify(jwt.verify)(
     token,
-    process.env.SECRET_JWT_SEED
+    process.env.SECRET_JWT_SEED,
   );
 
   const user = await User.findOne({
@@ -33,22 +33,22 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   if (!user) {
     return next(
-      new AppError('The owner of this token is not longer available', 401)
+      new AppError('The owner of this token is not longer available', 401),
     );
   }
 
   if (user.passwordChangedAt) {
     const changedTimeStamp = parseInt(
       user.passwordChangedAt.getTime() / 1000,
-      10
+      10,
     );
 
     if (decoded.iat < changedTimeStamp) {
       return next(
         new AppError(
           'User recently changed password!, please login again.',
-          401
-        )
+          401,
+        ),
       );
     }
   }
@@ -57,7 +57,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.protectAccountOwner = catchAsync(async (req, res, next) => {
+export const protectAccountOwner = catchAsync(async (req, res, next) => {
   const { user, sessionUser } = req;
 
   if (user.id !== sessionUser.id) {
@@ -67,11 +67,11 @@ exports.protectAccountOwner = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.restrictTo = (...roles) => {
+export const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.sessionUser.role)) {
       return next(
-        new AppError('You do not have permission to perform this action!', 403)
+        new AppError('You do not have permission to perform this action!', 403),
       );
     }
 

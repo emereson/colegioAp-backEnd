@@ -1,17 +1,18 @@
-const Attendance = require('../models/attendance.model');
-const Classroom = require('../models/classroom.model');
-const ClassroomsStudent = require('../models/classroomsStudents.model');
-const Course = require('../models/course.model');
-const Debts = require('../models/debts.model');
-const Exam = require('../models/exams.model');
-const Payments = require('../models/payments.model');
-const Archivo = require('../modules/archivos/archivos.model');
-const StudentFiles = require('../modules/studentFiles/studentFiles.model');
-const catchAsync = require('../utils/catchAsync');
-const FormData = require('form-data');
-const { default: axios } = require('axios');
+import catchAsync from '../utils/catchAsync.js';
+import FormData from 'form-data';
+import axios from 'axios';
 
-exports.findAllAttendances = catchAsync(async (req, res, next) => {
+import Attendance from '../models/attendance.model.js';
+import Classroom from '../models/classroom.model.js';
+import ClassroomsStudent from '../models/classroomsStudents.model.js';
+import Course from '../models/course.model.js';
+import Debts from '../models/debts.model.js';
+import Exam from '../models/exams.model.js';
+import Payments from '../models/payments.model.js';
+import Archivo from '../modules/archivos/archivos.model.js';
+import StudentFiles from '../modules/studentFiles/studentFiles.model.js';
+
+export const findAllAttendances = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const attendances = await Attendance.findAll({
@@ -26,7 +27,7 @@ exports.findAllAttendances = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllExams = catchAsync(async (req, res, next) => {
+export const findAllExams = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const exams = await Exam.findAll({
@@ -41,7 +42,7 @@ exports.findAllExams = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllPays = catchAsync(async (req, res, next) => {
+export const findAllPays = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const pays = await Payments.findAll({
@@ -55,7 +56,7 @@ exports.findAllPays = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllDebts = catchAsync(async (req, res, next) => {
+export const findAllDebts = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const debts = await Debts.findAll({
@@ -69,7 +70,7 @@ exports.findAllDebts = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllFiles = catchAsync(async (req, res, next) => {
+export const findAllFiles = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const files = await Archivo.findAll({
@@ -83,7 +84,7 @@ exports.findAllFiles = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.findAllStudentFiles = catchAsync(async (req, res, next) => {
+export const findAllStudentFiles = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const files = await StudentFiles.findAll({
@@ -97,7 +98,7 @@ exports.findAllStudentFiles = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createdStudentFile = catchAsync(async (req, res, next) => {
+export const createdStudentFile = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { name_student_file } = req.body;
 
@@ -117,7 +118,7 @@ exports.createdStudentFile = catchAsync(async (req, res, next) => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      }
+      },
     );
 
     file_url = responseImg.data.imagePath;

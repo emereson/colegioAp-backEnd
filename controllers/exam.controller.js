@@ -1,11 +1,11 @@
-const catchAsync = require('../utils/catchAsync');
-const Exam = require('../models/exams.model');
-const ClassroomsStudent = require('../models/classroomsStudents.model');
-const Student = require('../models/student.model');
-const { clientWhatsApp } = require('../routes/vincularWsp');
-const logger = require('../utils/logger');
+import catchAsync from '../utils/catchAsync.js';
+import Exam from '../models/exams.model.js';
+import ClassroomsStudent from '../models/classroomsStudents.model.js';
+import Student from '../models/student.model.js';
+import { clientWhatsApp } from '../routes/vincularWsp.js';
+import logger from '../utils/logger.js';
 
-exports.findAll = catchAsync(async (req, res, next) => {
+export const findAll = catchAsync(async (req, res, next) => {
   const exams = await Exam.findAll({});
 
   return res.status(200).json({
@@ -15,10 +15,9 @@ exports.findAll = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.whatsApp = catchAsync(async (req, res, next) => {
+export const whatsApp = catchAsync(async (req, res, next) => {
   const { id, nameExam } = req.params;
 
-  // Obtener los estudiantes con sus exámenes
   const classroomsStudents = await ClassroomsStudent.findAll({
     where: { classroom_id: id },
     include: [
@@ -34,10 +33,10 @@ exports.whatsApp = catchAsync(async (req, res, next) => {
     order: [[{ model: Student }, 'lastName', 'ASC']],
   });
 
-  // Verificar si el cliente de WhatsApp está listo antes de comenzar
-  if (!clientWhatsApp.info || !clientWhatsApp.pupPage) {
+  // Verificar si WhatsApp está listo
+  if (!clientWhatsApp?.info || !clientWhatsApp?.pupPage) {
     logger.error(
-      '⚠️ El cliente de WhatsApp no está inicializado correctamente.'
+      '⚠️ El cliente de WhatsApp no está inicializado correctamente.',
     );
     return res.status(503).json({
       status: 'fail',
@@ -46,30 +45,28 @@ exports.whatsApp = catchAsync(async (req, res, next) => {
   }
 
   for (const classroomStudent of classroomsStudents) {
-    // Si no hay examen, salta
     if (!classroomStudent.exams || classroomStudent.exams.length === 0)
       continue;
 
     const examName = classroomStudent.exams[0].name;
     const student = classroomStudent.student;
 
-    // Si no tiene número, salta
-    if (!student.phoneNumber) {
-      logger.info(`⚠️ El alumno ${student.name} no tiene número de teléfono.`);
+    if (!student?.phoneNumber) {
+      logger.info(`⚠️ El alumno ${student?.name} no tiene número de teléfono.`);
       continue;
     }
 
-    const message = `Se le comunica que se ha registrado las notas del examen de la ${examName} del alumno ${student.name}. Para mayor detalle puede ingresar a la siguiente dirección https://alipioponce.com/`;
+    const message = `Se le comunica que se ha registrado las notas del examen de ${examName} del alumno ${student.name}. 
+Para mayor detalle puede ingresar a: https://alipioponce.com/`;
 
-    const number = `51${student.phoneNumber.replace(/\D/g, '')}`; // limpia y agrega código de país
+    const number = `51${student.phoneNumber.replace(/\D/g, '')}`;
 
     try {
-      // Obtener correctamente el número de WhatsApp
       const numberDetails = await clientWhatsApp.getNumberId(number);
 
       if (!numberDetails) {
         logger.info(
-          `⚠️ El número ${number} (${student.name}) no tiene cuenta de WhatsApp.`
+          `⚠️ El número ${number} (${student.name}) no tiene WhatsApp.`,
         );
         continue;
       }
@@ -79,12 +76,11 @@ exports.whatsApp = catchAsync(async (req, res, next) => {
       await clientWhatsApp.sendMessage(chatId, message);
       logger.info(`✅ Mensaje enviado a ${student.name} (${chatId})`);
 
-      // Esperar 8 segundos para evitar bloqueo de WhatsApp
+      // Esperar para evitar bloqueo
       await new Promise((resolve) => setTimeout(resolve, 8000));
     } catch (err) {
       logger.error(
-        `❌ Error al enviar mensaje a ${student.name}:`,
-        err.message
+        `❌ Error al enviar mensaje a ${student.name}: ${err.message}`,
       );
     }
   }
@@ -95,42 +91,43 @@ exports.whatsApp = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createClassrooms = catchAsync(async (req, res, next) => {
+export const createClassrooms = catchAsync(async (req, res, next) => {
   const { idAula, data } = req.body;
+
   const classroomsStudent = await ClassroomsStudent.findAll({
     where: {
       classroom_id: idAula,
     },
   });
+
   if (!classroomsStudent.length) {
     return res.status(404).json({
       status: 'fail',
-      message: 'No  hay ningun alumno registrado para esta  aula',
+      message: 'No hay ningún alumno registrado para esta aula',
     });
   }
+
   await Promise.all(
-    classroomsStudent.map(
-      async ({ id }) =>
-        await Exam.create({
-          classroom_student_id: id,
-          name: data.name,
-          teacher: data.teacher,
-        })
-    )
+    classroomsStudent.map(({ id }) =>
+      Exam.create({
+        classroom_student_id: id,
+        name: data.name,
+        teacher: data.teacher,
+      }),
+    ),
   );
 
   return res.status(201).json({
     status: 'Success',
-    message: 'course created successfully',
-    // course,
+    message: 'Exams created successfully',
   });
 });
 
-exports.create = catchAsync(async (req, res, next) => {
+export const create = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { name, teacher } = req.body;
 
-  const course = await Exam.create({
+  const exam = await Exam.create({
     classroomId: id,
     name,
     teacher,
@@ -138,12 +135,12 @@ exports.create = catchAsync(async (req, res, next) => {
 
   return res.status(201).json({
     status: 'Success',
-    message: 'course created successfully',
-    course,
+    message: 'Exam created successfully',
+    exam,
   });
 });
 
-exports.findOne = catchAsync(async (req, res, next) => {
+export const findOne = catchAsync(async (req, res, next) => {
   const { exam } = req;
 
   return res.status(200).json({
@@ -152,7 +149,7 @@ exports.findOne = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.update = catchAsync(async (req, res) => {
+export const update = catchAsync(async (req, res) => {
   const { exam } = req;
   const { name, note } = req.body;
 
@@ -168,13 +165,14 @@ exports.update = catchAsync(async (req, res) => {
   });
 });
 
-exports.delete = catchAsync(async (req, res, next) => {
+export const remove = catchAsync(async (req, res, next) => {
   const { exam } = req;
 
   await exam.destroy();
+
   return res.status(200).json({
     status: 'success',
-    message: 'the exam has been delete',
+    message: 'The exam has been deleted',
     exam,
   });
 });

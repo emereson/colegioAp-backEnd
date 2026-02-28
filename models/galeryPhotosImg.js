@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { db } = require('../database/config');
+import { DataTypes } from 'sequelize';
+import db from '../database/config.js';
 
 const GaleryPhotosImg = db.define('galeryPhotosImg', {
   id: {
@@ -19,4 +19,4 @@ const GaleryPhotosImg = db.define('galeryPhotosImg', {
   },
 });
 
-module.exports = GaleryPhotosImg;
+export default GaleryPhotosImg;

@@ -1,8 +1,8 @@
-const Notifications = require('../models/notifications.model');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
+import Notifications from '../models/notifications.model.js';
+import AppError from '../utils/AppError.js';
+import catchAsync from '../utils/catchAsync.js';
 
-exports.validExistNotifications = catchAsync(async (req, res, next) => {
+export const validExistNotifications = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const notification = await Notifications.findOne({
