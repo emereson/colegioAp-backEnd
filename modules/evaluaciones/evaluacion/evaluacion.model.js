@@ -1,54 +1,99 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Op } from 'sequelize'; // 👈 Importamos Op para comparaciones
 import db from '../../../database/config.js';
 import { toUpper } from '../../../utils/multer.js';
 
-const Evaluaciones = db.define('evaluaciones', {
-  id: {
-    primaryKey: true,
-    autoIncrement: true,
-    allowNull: false,
-    type: DataTypes.INTEGER,
-  },
-  aula_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  nombre_evaluacion: {
-    type: DataTypes.STRING,
-    allow: false,
-    set(value) {
-      this.setDataValue('nombre_evaluacion', toUpper(value));
+const Evaluaciones = db.define(
+  'evaluaciones',
+  {
+    id: {
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+      type: DataTypes.INTEGER,
+    },
+    aula_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    nombre_evaluacion: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      set(value) {
+        this.setDataValue('nombre_evaluacion', toUpper(value));
+      },
+    },
+    semana_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    fecha_disponible: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    fecha_entrega: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    limite_tiempo: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    puntos: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    preguntas_disponibles: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM('ACTIVO', 'CULMINADO', 'CANCELADO'),
+      allowNull: false,
+      defaultValue: 'ACTIVO',
     },
   },
-  semana_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+  {
+    hooks: {
+      /**
+       * 1️⃣ VALIDACIÓN (Fail-Fast): Evita que se guarden fechas incoherentes.
+       */
+      beforeSave: (evaluacion) => {
+        const inicio = new Date(evaluacion.fecha_disponible);
+        const fin = new Date(evaluacion.fecha_entrega);
+
+        if (inicio >= fin) {
+          throw new Error(
+            'Error: La fecha de apertura debe ser estrictamente anterior a la fecha de entrega.',
+          );
+        }
+      },
+
+      /**
+       * 2️⃣ SINCRONIZACIÓN MASIVA: Se ejecuta una sola consulta SQL
+       * cada vez que alguien consulta la tabla.
+       */
+      afterFind: async () => {
+        const now = new Date();
+
+        // En lugar de un bucle for, usamos un UPDATE masivo de Sequelize.
+        // Esto es 100 veces más rápido porque es una sola consulta al motor de DB.
+        await Evaluaciones.update(
+          { status: 'CULMINADO' },
+          {
+            where: {
+              status: 'ACTIVO',
+              fecha_entrega: { [Op.lt]: now }, // [Op.lt] significa "Less Than" (menor que ahora)
+            },
+          },
+        ).catch((err) => {
+          console.error(
+            '⚠️ Error en la auto-culminación de exámenes:',
+            err.message,
+          );
+        });
+      },
+    },
   },
-  fecha_disponible: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  fecha_entrega: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  limite_tiempo: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  puntos: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  preguntas_disponibles: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  status: {
-    type: DataTypes.ENUM('ACTIVO', 'CULMINADO', 'CANCELADO'),
-    allowNull: false,
-    defaultValue: 'ACTIVO',
-  },
-});
+);
 
 export default Evaluaciones;

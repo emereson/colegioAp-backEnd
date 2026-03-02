@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import db from '../../../database/config.js';
 import Classroom from '../../../models/classroom.model.js';
 import AppError from '../../../utils/AppError.js';
@@ -200,9 +201,10 @@ export const create = catchAsync(async (req, res, next) => {
   }
 });
 
-export const update = catchAsync(async (req, res) => {
+export const update = catchAsync(async (req, res, next) => {
   const { evaluacion } = req;
   const {
+    nombre_evaluacion,
     fecha_disponible,
     fecha_entrega,
     limite_tiempo,
@@ -211,30 +213,174 @@ export const update = catchAsync(async (req, res) => {
     status,
   } = req.body;
 
-  await evaluacion.update({
-    fecha_disponible,
-    fecha_entrega,
-    limite_tiempo,
-    puntos,
-    preguntas_disponibles,
-    status,
-  });
+  let preguntasArray = [];
+  try {
+    preguntasArray =
+      typeof req.body.preguntas === 'string'
+        ? JSON.parse(req.body.preguntas)
+        : req.body.preguntas;
+  } catch (error) {
+    return next(new AppError('Formato de preguntas inválido.', 400));
+  }
 
-  res.status(201).json({
-    status: 'success',
-    message: 'the evaluacion has ben update successfully!',
-    evaluacion,
-  });
+  const imagenesNuevasSubidas = [];
+  const imagenesParaBorrar = [];
+
+  try {
+    const promesasPreguntas = preguntasArray.map(async (pregunta, i) => {
+      const {
+        id,
+        titulo_pregunta,
+        descripcion_pregunta,
+        tipo_pregunta,
+        respuestas,
+      } = pregunta;
+
+      const { value: opcionesValidadas, error } = validarRespuestasJSON(
+        tipo_pregunta,
+        respuestas,
+      );
+      if (error) throw new Error(`Pregunta ${i + 1}: ${error.message}`);
+
+      let imagenFinal = null;
+
+      if (req.files && req.files.length > 0) {
+        const file = req.files.find(
+          (f) => f.fieldname === `imagen_pregunta_${i}`,
+        );
+        if (file) {
+          imagenFinal = await uploadImage(file);
+          imagenesNuevasSubidas.push(imagenFinal);
+
+          // 🟢 OPTIMIZACIÓN: Buscamos la imagen vieja en el array que ya trajo el middleware
+          if (id) {
+            const preguntaVieja = evaluacion.preguntas_evaluacion.find(
+              (p) => p.id === Number(id),
+            );
+            if (preguntaVieja?.imagen_pregunta) {
+              imagenesParaBorrar.push(preguntaVieja.imagen_pregunta);
+            }
+          }
+        }
+      }
+
+      return {
+        id,
+        titulo_pregunta,
+        descripcion_pregunta,
+        tipo_pregunta,
+        respuestas: opcionesValidadas,
+        ...(imagenFinal && { imagen_pregunta: imagenFinal }),
+        evaluacion_id: evaluacion.id,
+      };
+    });
+
+    const preguntasProcesadas = await Promise.all(promesasPreguntas);
+
+    await db.transaction(async (t) => {
+      // A. Actualizar cabecera
+      await evaluacion.update(
+        {
+          nombre_evaluacion,
+          fecha_disponible,
+          fecha_entrega,
+          limite_tiempo,
+          puntos,
+          preguntas_disponibles,
+          status,
+        },
+        { transaction: t },
+      );
+
+      // B. Identificar eliminaciones
+      const idsNuevos = preguntasProcesadas
+        .filter((p) => p.id)
+        .map((p) => Number(p.id));
+
+      // 🟢 OPTIMIZACIÓN: Filtramos desde memoria para saber qué imágenes borrar físicamente
+      evaluacion.preguntas_evaluacion.forEach((p) => {
+        if (!idsNuevos.includes(p.id) && p.imagen_pregunta) {
+          imagenesParaBorrar.push(p.imagen_pregunta);
+        }
+      });
+
+      // C. Borrado en DB
+      await PreguntaEvaluacion.destroy({
+        where: {
+          evaluacion_id: evaluacion.id,
+          id: { [Op.notIn]: idsNuevos },
+        },
+        transaction: t,
+      });
+
+      // D. Upsert manual (Update o Create)
+      for (const pData of preguntasProcesadas) {
+        if (pData.id) {
+          await PreguntaEvaluacion.update(pData, {
+            where: { id: pData.id },
+            transaction: t,
+          });
+        } else {
+          await PreguntaEvaluacion.create(pData, { transaction: t });
+        }
+      }
+    });
+
+    // 2. Limpieza de archivos (Solo si la transacción fue exitosa)
+    if (imagenesParaBorrar.length > 0) {
+      // Eliminamos duplicados por si acaso
+      [...new Set(imagenesParaBorrar)].forEach((img) =>
+        deleteImage(img).catch(console.error),
+      );
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Evaluación actualizada.',
+      evaluacion,
+    });
+  } catch (error) {
+    if (imagenesNuevasSubidas.length > 0) {
+      imagenesNuevasSubidas.forEach((img) =>
+        deleteImage(img).catch(console.error),
+      );
+    }
+    return next(new AppError(error.message, 500));
+  }
 });
 
-export const remove = catchAsync(async (req, res) => {
+export const remove = catchAsync(async (req, res, next) => {
   const { evaluacion } = req;
 
-  await evaluacion.destroy();
+  const imagenesABorrar = evaluacion.preguntas_evaluacion
+    .map((p) => p.imagen_pregunta)
+    .filter((img) => img !== null && img !== '');
 
-  return res.status(200).json({
-    status: 'success',
-    message: `The evaluacion with id: ${evaluacion.id} has been deleted`,
-    evaluacion,
-  });
+  try {
+    await db.transaction(async (t) => {
+      await evaluacion.preguntas_evaluacion.forEach(async (p) => {
+        await p.destroy({ transaction: t });
+      });
+      await evaluacion.destroy({ transaction: t });
+    });
+
+    if (imagenesABorrar.length > 0) {
+      Promise.allSettled(
+        imagenesABorrar.map((nombreArchivo) => deleteImage(nombreArchivo)),
+      ).catch((err) => console.error('Error limpiando archivos:', err));
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: `La evaluación "${evaluacion.nombre_evaluacion}" ha sido eliminada permanentemente.`,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(
+      new AppError(
+        'No se pudo completar la eliminación. Inténtalo de nuevo.',
+        500,
+      ),
+    );
+  }
 });

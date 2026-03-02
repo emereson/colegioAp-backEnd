@@ -26,7 +26,7 @@ router
   .patch(
     upload.any(),
     evaluacionMiddleware.validExistEvaluaciones,
-    evaluacionController.create,
+    evaluacionController.update,
   )
   .delete(
     evaluacionMiddleware.validExistEvaluaciones,
