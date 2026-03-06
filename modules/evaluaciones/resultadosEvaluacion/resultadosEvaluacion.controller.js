@@ -29,16 +29,6 @@ export const getExamsByWeek = catchAsync(async (req, res, next) => {
     order: [['createdAt', 'DESC']],
   });
 
-  if (!semanas || semanas.length === 0) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'No se encontraron semanas con evaluaciones activas.',
-    });
-  }
-
-  // 🗑️ Toda la lógica de limpieza de respuestas fue eliminada porque
-  // ya no traemos las preguntas en esta ruta.
-
   return res.status(200).json({
     status: 'Success',
     semanas, // Enviamos las semanas directamente
