@@ -5,6 +5,7 @@ import catchAsync from '../../utils/catchAsync.js';
 import logger from '../../utils/logger.js';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import storage from '../../utils/firebase.js';
+import { deleteImage, uploadImage } from '../../utils/serverImage.js';
 
 export const findAll = catchAsync(async (req, res, next) => {
   const archivos = await Archivo.findAll({});
@@ -46,22 +47,7 @@ export const create = catchAsync(async (req, res, next) => {
   let archivo_url = null;
 
   if (req.file) {
-    const file = req.file;
-    const formDataImg = new FormData();
-
-    formDataImg.append('image', file.buffer, {
-      filename: file.originalname,
-    });
-
-    const responseImg = await axios.post(
-      `${process.env.SERVER_IMAGE}/image`,
-      formDataImg,
-      {
-        headers: formDataImg.getHeaders(),
-      },
-    );
-
-    archivo_url = responseImg.data.imagePath;
+    archivo_url = await uploadImage(req.file);
   }
 
   const archivo = await Archivo.create({
@@ -112,9 +98,7 @@ export const remove = catchAsync(async (req, res) => {
   const archivo_url = archivo.archivo_url;
 
   try {
-    await axios.delete(
-      `${process.env.SERVER_IMAGE}/delete-image/${archivo_url}`,
-    );
+    await deleteImage(archivo_url);
 
     await archivo.destroy();
 

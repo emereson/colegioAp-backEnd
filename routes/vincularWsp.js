@@ -1,16 +1,26 @@
 import express from 'express';
 import { Client } from 'whatsapp-web.js';
-import puppeteer from 'puppeteer';
 import qrcode from 'qrcode';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
 
 export const clientWhatsApp = new Client({
-  // authStrategy: new NoAuth(),
   puppeteer: {
-    executablePath: puppeteer.executablePath(),
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+    // 🟢 Si CHROME_BIN existe (en Railway), lo usa. Si no, usa tu ruta local de Mac.
+    executablePath:
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    // 🟢 ESTOS ARGUMENTOS SON OBLIGATORIOS PARA SERVIDORES LINUX / RAILWAY
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage', // Evita que Chrome colapse por falta de memoria en el servidor
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu',
+    ],
   },
 });
 

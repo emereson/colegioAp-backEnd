@@ -311,10 +311,10 @@ export const login = catchAsync(async (req, res, next) => {
 });
 
 export const findOne = catchAsync(async (req, res, next) => {
-  const { sessionUser } = req;
+  const { id } = req.params;
   const student = await Student.findOne({
     where: {
-      id: sessionUser.id,
+      id: id,
     },
     include: [
       {
@@ -329,6 +329,7 @@ export const findOne = catchAsync(async (req, res, next) => {
       },
     ],
   });
+
   return res.status(200).json({
     status: 'Success',
     student,

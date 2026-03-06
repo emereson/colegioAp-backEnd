@@ -3,6 +3,7 @@ import axios from 'axios';
 import catchAsync from '../../utils/catchAsync.js';
 import StudentFiles from './studentFiles.model.js';
 import logger from '../../utils/logger.js';
+import { deleteImage, uploadImage } from '../../utils/serverImage.js';
 
 export const findAll = catchAsync(async (req, res, next) => {
   const studentFiles = await StudentFiles.findAll({});
@@ -45,23 +46,7 @@ export const create = catchAsync(async (req, res, next) => {
   let file_url = null;
 
   if (req.file) {
-    const file = req.file;
-    const formDataImg = new FormData();
-    formDataImg.append('image', file.buffer, {
-      filename: file.originalname,
-    });
-
-    const responseImg = await axios.post(
-      `${process.env.SERVER_IMAGE}/image`,
-      formDataImg,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      },
-    );
-
-    file_url = responseImg.data.imagePath;
+    file_url = await uploadImage(req.file);
   }
 
   const studentFile = await StudentFiles.create({
@@ -97,9 +82,7 @@ export const remove = catchAsync(async (req, res) => {
   const studentFile_url = studentFile.file_url;
 
   try {
-    await axios.delete(
-      `${process.env.SERVER_IMAGE}/delete-image/${studentFile_url}`,
-    );
+    await deleteImage(studentFile_url);
 
     await studentFile.destroy();
 

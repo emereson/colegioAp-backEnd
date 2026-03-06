@@ -67,10 +67,10 @@ app.use('/api/v1/notifications', notificationsRouter);
 app.use('/api/v1/calendar', calendarRouter);
 app.use('/api/v1/galeryPhotos', galeryPhotosRouter);
 app.use('/api/v1/accessStudent', accessStudentRouter);
-app.use('/api/v1/vincular-wsp', vincularWspRouter);
 app.use('/api/v1/archivos', archivosRouter);
 app.use('/api/v1/student-files', studentFilesRouter);
 // evaluaciones
+app.use('/api/v1/vincular-wsp', vincularWspRouter);
 app.use('/api/v1/semana-evaluaciones', semanaEvaluacionesRouter);
 app.use('/api/v1/evaluacion', evaluacionRouter);
 app.use('/api/v1/resultado-evaluacion', resuldatosEvaluacionRouter);

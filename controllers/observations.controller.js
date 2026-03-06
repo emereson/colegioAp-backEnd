@@ -56,7 +56,7 @@ export const findAllStudentId = catchAsync(async (req, res, next) => {
 
 export const create = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const { name, description, student, notificationWhatsApp } = req.body;
+  const { name, description } = req.body;
 
   const observation = await Observations.create({
     studentId: id,

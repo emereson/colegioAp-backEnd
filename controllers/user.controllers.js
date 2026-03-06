@@ -51,13 +51,12 @@ export const login = catchAsync(async (req, res, next) => {
   const { dni, password } = req.body;
 
   const user = await User.findOne({
-    where: {
-      dni,
-    },
+    where: { dni },
+    attributes: ['id', 'name', 'role', 'password'],
   });
 
   if (!user) {
-    return next(new AppError('El dni no se encuentra registrado', 404));
+    return next(new AppError('El DNI no se encuentra registrado', 404));
   }
 
   if (!(await bcrypt.compare(password, user.password))) {
@@ -66,9 +65,13 @@ export const login = catchAsync(async (req, res, next) => {
 
   const token = await generateJWT(user.id);
 
+  const userData = user.toJSON();
+  delete userData.password;
+
   res.status(200).json({
     status: 'success',
     token,
+    user: userData, // Enviamos el usuario limpio
   });
 });
 
