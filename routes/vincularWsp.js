@@ -2,22 +2,14 @@ import express from 'express';
 import { Client } from 'whatsapp-web.js';
 import qrcode from 'qrcode';
 import logger from '../utils/logger.js';
+import puppeteer from 'puppeteer';
 
 const router = express.Router();
 
 export const clientWhatsApp = new Client({
   puppeteer: {
-    headless: true,
-    executablePath: '/usr/bin/chromium', // 🟢 ESTOS ARGUMENTOS SON OBLIGATORIOS PARA SERVIDORES LINUX / RAILWAY
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage', // Evita que Chrome colapse por falta de memoria en el servidor
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu',
-    ],
+    executablePath: puppeteer.executablePath(),
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   },
 });
 
