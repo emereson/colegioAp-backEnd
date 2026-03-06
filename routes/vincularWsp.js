@@ -8,10 +8,7 @@ const router = express.Router();
 export const clientWhatsApp = new Client({
   puppeteer: {
     headless: true,
-    // 🟢 Si CHROME_BIN existe (en Railway), lo usa. Si no, usa tu ruta local de Mac.
-    executablePath:
-      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    // 🟢 ESTOS ARGUMENTOS SON OBLIGATORIOS PARA SERVIDORES LINUX / RAILWAY
+    executablePath: '/usr/bin/chromium', // 🟢 ESTOS ARGUMENTOS SON OBLIGATORIOS PARA SERVIDORES LINUX / RAILWAY
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
