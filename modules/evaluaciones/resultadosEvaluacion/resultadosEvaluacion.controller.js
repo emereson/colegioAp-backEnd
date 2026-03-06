@@ -7,10 +7,10 @@ import { Op } from 'sequelize';
 
 export const getExamsByWeek = catchAsync(async (req, res, next) => {
   const { sessionUser } = req;
-  const { id } = req.params; // ID del Aula
+  const { id } = req.params;
 
   const semanas = await SemanaEvaluacion.findAll({
-    // where: { aula_id: id },
+    where: { aula_id: id },
     include: [
       {
         model: Evaluaciones,
