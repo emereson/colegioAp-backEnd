@@ -94,6 +94,15 @@ const initModel = () => {
     foreignKey: 'evaluacion_id',
     as: 'evaluacion',
   });
+
+  Student.hasMany(ResultadosEvaluacion, {
+    foreignKey: 'estudiante_id',
+    as: 'resultados_evaluacion',
+  });
+  ResultadosEvaluacion.belongsTo(Student, {
+    foreignKey: 'estudiante_id',
+    as: 'estudiante',
+  });
 };
 
 export default initModel;

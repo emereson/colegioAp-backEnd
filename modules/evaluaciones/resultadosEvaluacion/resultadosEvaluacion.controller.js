@@ -3,7 +3,9 @@ import SemanaEvaluacion from '../semanaEvaluacion/semanaEvaluacion.model.js';
 import catchAsync from '../../../utils/catchAsync.js';
 import ResultadosEvaluacion from '../resultadosEvaluacion/resultadosEvaluacion.model.js';
 import Evaluaciones from '../evaluacion/evaluacion.model.js';
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
+import Student from '../../../models/student.model.js';
+import Classroom from '../../../models/classroom.model.js';
 
 export const getExamsByWeek = catchAsync(async (req, res, next) => {
   const { sessionUser } = req;
@@ -411,5 +413,204 @@ export const getExamReview = catchAsync(async (req, res, next) => {
     status: 'Success',
     resultado: resultado,
     evaluacion: examJSON,
+  });
+});
+
+export const getExamReviewAdmin = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  // 1. Buscamos el resultado del alumno
+  const resultado = await ResultadosEvaluacion.findOne({
+    where: { id: id },
+  });
+
+  if (!resultado) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'No se encontraron resultados para esta evaluación.',
+    });
+  }
+
+  const respuestasAlumno = resultado.respuestas_enviadas || {};
+
+  // ================= 2. FILTRO INTELIGENTE DE IDs =================
+  // Extraemos solo los IDs de las preguntas que realmente fueron respondidas
+  const questionIds = Object.keys(respuestasAlumno).filter((key) => {
+    const respuesta = respuestasAlumno[key];
+
+    // Descartar null, undefined o strings vacíos
+    if (respuesta === null || respuesta === undefined || respuesta === '') {
+      return false;
+    }
+
+    // Si es un Array (ej: [null, "Word", null...]), validar que tenga al menos un dato real
+    if (Array.isArray(respuesta)) {
+      return respuesta.some(
+        (item) => item !== null && item !== undefined && item !== '',
+      );
+    }
+
+    // Si es un Objeto (ej: {} o { hueco_1: 'texto' }), validar que no esté vacío
+    if (typeof respuesta === 'object') {
+      return Object.keys(respuesta).length > 0;
+    }
+
+    // Si es un valor simple (string, número), es válido
+    return true;
+  });
+  // ================================================================
+
+  console.log(resultado.evaluacion_id);
+
+  // 3. Traemos la evaluación filtrando solo las preguntas respondidas
+  const evaluacion = await Evaluaciones.findOne({
+    where: { id: resultado.evaluacion_id },
+    include: [
+      {
+        model: SemanaEvaluacion,
+        as: 'semana_evaluacion',
+      },
+      {
+        model: PreguntaEvaluacion,
+        as: 'preguntas_evaluacion',
+        // Usamos [Op.in] para buscar múltiples IDs correctamente
+        where:
+          questionIds.length > 0
+            ? { id: { [Op.in]: questionIds } }
+            : { id: null },
+        required: false,
+      },
+    ],
+  });
+
+  if (!evaluacion) {
+    return res.status(404).json({ message: 'No se encontró la evaluación.' });
+  }
+
+  const examJSON = evaluacion.toJSON();
+
+  // 4. LÓGICA ESTRICTA: Ocultar respuesta correcta si se equivocó
+  examJSON.preguntas_evaluacion.forEach((pregunta) => {
+    const respuestaEnviada = respuestasAlumno[pregunta.id];
+    let esCorrecta = false;
+
+    // Evaluamos si el alumno acertó
+    if (respuestaEnviada) {
+      switch (pregunta.tipo_pregunta) {
+        case 'ALTERNATIVAS':
+          const opcionCorrecta = pregunta.respuestas.find((r) => r.esCorrecta);
+          esCorrecta = String(opcionCorrecta?.id) === String(respuestaEnviada);
+          break;
+
+        case 'POR RELACIONAR':
+          const dataRelacion = pregunta.respuestas;
+          let parejasCorrectas = 0;
+          dataRelacion.parejas.forEach((p) => {
+            if (respuestaEnviada[p.id] === p.respuesta_correcta) {
+              parejasCorrectas++;
+            }
+          });
+          esCorrecta = parejasCorrectas === dataRelacion.parejas.length;
+          break;
+
+        case 'COMPLETAR':
+          const dataCompletar = pregunta.respuestas;
+          let huecosCorrectos = 0;
+          const totalHuecos = Object.keys(
+            dataCompletar.respuestas_correctas,
+          ).length;
+          Object.keys(dataCompletar.respuestas_correctas).forEach((hueco) => {
+            if (
+              respuestaEnviada[hueco]?.trim().toLowerCase() ===
+              dataCompletar.respuestas_correctas[hueco].trim().toLowerCase()
+            ) {
+              huecosCorrectos++;
+            }
+          });
+          esCorrecta = huecosCorrectos === totalHuecos;
+          break;
+      }
+    }
+
+    // 🟢 Le pasamos al frontend si acertó o no
+    pregunta.acertada = esCorrecta;
+
+    // 🔴 SI SE EQUIVOCÓ (o no respondió), ELIMINAMOS LA RESPUESTA CORRECTA DEL JSON
+    if (!esCorrecta) {
+      if (pregunta.tipo_pregunta === 'ALTERNATIVAS') {
+        pregunta.respuestas.forEach((r) => delete r.esCorrecta);
+      } else if (pregunta.tipo_pregunta === 'POR RELACIONAR') {
+        pregunta.respuestas.parejas.forEach((p) => delete p.respuesta_correcta);
+      } else if (pregunta.tipo_pregunta === 'COMPLETAR') {
+        delete pregunta.respuestas.respuestas_correctas;
+      }
+    }
+  });
+
+  return res.status(200).json({
+    status: 'Success',
+    resultado: resultado,
+    evaluacion: examJSON,
+  });
+});
+
+export const getExamenes = catchAsync(async (req, res, next) => {
+  const { year, estudiante } = req.query;
+
+  const estudianteWhere = {};
+
+  if (estudiante && estudiante.trim().length > 0) {
+    estudianteWhere = {
+      [Op.or]: [
+        { lastName: { [Op.iLike]: `%${estudiante}%` } },
+        { name: { [Op.iLike]: `%${estudiante}%` } },
+        { dni: { [Op.like]: `%${estudiante}%` } },
+        { phoneNumber: { [Op.like]: `%${estudiante}%` } },
+      ],
+    };
+  }
+
+  // ================= 3. EJECUCIÓN Y RESPUESTA =================
+  const resultados = await ResultadosEvaluacion.findAll({
+    include: [
+      {
+        model: Student,
+        as: 'estudiante',
+        where: estudianteWhere,
+      },
+      {
+        model: Evaluaciones,
+        as: 'evaluacion',
+        include: [
+          {
+            model: SemanaEvaluacion,
+            as: 'semana_evaluacion',
+
+            where: year && year.length > 0 ? { year } : {},
+          },
+          {
+            model: Classroom,
+            as: 'aula',
+          },
+        ],
+      },
+    ],
+
+    order: [['createdAt', 'DESC']],
+    limit: estudiante && estudiante.trim().length > 0 ? undefined : 20,
+  });
+
+  if (!resultados || resultados.length === 0) {
+    return res.status(404).json({
+      status: 'fail',
+      message:
+        'No se encontraron resultados de evaluaciones con los parámetros indicados.',
+    });
+  }
+
+  return res.status(200).json({
+    status: 'success',
+    results: resultados.length,
+    data: resultados,
   });
 });

@@ -5,9 +5,12 @@ const alternativasSchema = Joi.array()
   .items(
     Joi.object({
       id: Joi.alternatives().try(Joi.string(), Joi.number()).required(),
-      texto: Joi.string().required(),
+      // Permitimos que el texto venga vacío o nulo en caso de que solo sea una imagen
+      texto: Joi.string().allow('', null).optional(),
       esCorrecta: Joi.boolean().required(),
-    }),
+      // Agregamos el campo para la imagen (guardará el nombre del archivo o URL)
+      imagen: Joi.string().allow('', null).optional(),
+    }).or('texto', 'imagen'), // Regla de oro: O tiene texto, o tiene imagen (o ambos)
   )
   .min(2)
   .required();
