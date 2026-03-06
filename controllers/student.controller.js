@@ -336,6 +336,31 @@ export const findOne = catchAsync(async (req, res, next) => {
   });
 });
 
+export const findOneStudent = catchAsync(async (req, res, next) => {
+  const { sessionUser } = req;
+  const student = await Student.findOne({
+    where: {
+      id: sessionUser.id,
+    },
+    include: [
+      {
+        model: ClassroomsStudent,
+        include: [{ model: Classroom }],
+      },
+      {
+        model: Observations,
+      },
+      {
+        model: Debts,
+      },
+    ],
+  });
+
+  return res.status(200).json({
+    status: 'Success',
+    student,
+  });
+});
 export const update = catchAsync(async (req, res) => {
   const { student } = req;
   const { name, lastName, dni, status, phoneNumber, password } = req.body;
