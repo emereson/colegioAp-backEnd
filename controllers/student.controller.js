@@ -311,8 +311,24 @@ export const login = catchAsync(async (req, res, next) => {
 });
 
 export const findOne = catchAsync(async (req, res, next) => {
-  const { student } = req;
-
+  const { sessionUser } = req;
+  const student = await Student.findOne({
+    where: {
+      id: sessionUser.id,
+    },
+    include: [
+      {
+        model: ClassroomsStudent,
+        include: [{ model: Classroom }],
+      },
+      {
+        model: Observations,
+      },
+      {
+        model: Debts,
+      },
+    ],
+  });
   return res.status(200).json({
     status: 'Success',
     student,

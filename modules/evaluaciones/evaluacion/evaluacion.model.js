@@ -47,16 +47,13 @@ const Evaluaciones = db.define(
       allowNull: false,
     },
     status: {
-      type: DataTypes.ENUM('ACTIVO', 'CULMINADO', 'CANCELADO'),
+      type: DataTypes.ENUM('ACTIVO', 'INACTIVO', 'CANCELADO'),
       allowNull: false,
       defaultValue: 'ACTIVO',
     },
   },
   {
     hooks: {
-      /**
-       * 1️⃣ VALIDACIÓN (Fail-Fast): Evita que se guarden fechas incoherentes.
-       */
       beforeSave: (evaluacion) => {
         const inicio = new Date(evaluacion.fecha_disponible);
         const fin = new Date(evaluacion.fecha_entrega);
@@ -68,17 +65,11 @@ const Evaluaciones = db.define(
         }
       },
 
-      /**
-       * 2️⃣ SINCRONIZACIÓN MASIVA: Se ejecuta una sola consulta SQL
-       * cada vez que alguien consulta la tabla.
-       */
       afterFind: async () => {
         const now = new Date();
 
-        // En lugar de un bucle for, usamos un UPDATE masivo de Sequelize.
-        // Esto es 100 veces más rápido porque es una sola consulta al motor de DB.
         await Evaluaciones.update(
-          { status: 'CULMINADO' },
+          { status: 'INACTIVO' },
           {
             where: {
               status: 'ACTIVO',

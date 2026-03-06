@@ -12,6 +12,7 @@ import Student from './student.model.js';
 import SemanaEvaluacion from '../modules/evaluaciones/semanaEvaluacion/semanaEvaluacion.model.js';
 import Evaluaciones from '../modules/evaluaciones/evaluacion/evaluacion.model.js';
 import PreguntaEvaluacion from '../modules/evaluaciones/preguntasEvaluacion/preguntaEvaluacion.model.js';
+import ResultadosEvaluacion from '../modules/evaluaciones/resultadosEvaluacion/resultadosEvaluacion.model.js';
 
 const initModel = () => {
   Student.hasMany(Observations, { foreignKey: 'studentId' });
@@ -81,6 +82,15 @@ const initModel = () => {
     as: 'preguntas_evaluacion',
   });
   PreguntaEvaluacion.belongsTo(Evaluaciones, {
+    foreignKey: 'evaluacion_id',
+    as: 'evaluacion',
+  });
+
+  Evaluaciones.hasOne(ResultadosEvaluacion, {
+    foreignKey: 'evaluacion_id',
+    as: 'resultados_evaluacion',
+  });
+  ResultadosEvaluacion.belongsTo(Evaluaciones, {
     foreignKey: 'evaluacion_id',
     as: 'evaluacion',
   });

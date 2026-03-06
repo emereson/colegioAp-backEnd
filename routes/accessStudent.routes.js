@@ -59,15 +59,9 @@ router.post(
   classroomStudentMiddleware.validExistClassroomsStudent,
   accesStudentController.createdStudentFile,
 );
+router.get('/', studentController.findOne);
 
 router.get('/notifications', notificationsController.findAll);
 router.get('/calendar', calendarController.findAll);
-
-router.get(
-  '/:id',
-  studentMiddleware.validExistStudent2,
-  studentMiddleware.protectAccountOwner,
-  studentController.findOne,
-);
 
 export default router;

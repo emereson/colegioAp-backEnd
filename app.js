@@ -27,6 +27,7 @@ import archivosRouter from './modules/archivos/archivos.routes.js';
 import studentFilesRouter from './modules/studentFiles/studentFiles.routes.js';
 import semanaEvaluacionesRouter from './modules/evaluaciones/semanaEvaluacion/semanaEvaluacion.routes.js';
 import evaluacionRouter from './modules/evaluaciones/evaluacion/evaluacion.routes.js';
+import resuldatosEvaluacionRouter from './modules/evaluaciones/resultadosEvaluacion/resultadosEvaluacion.routes.js';
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use('/api/v1/student-files', studentFilesRouter);
 // evaluaciones
 app.use('/api/v1/semana-evaluaciones', semanaEvaluacionesRouter);
 app.use('/api/v1/evaluacion', evaluacionRouter);
+app.use('/api/v1/resultado-evaluacion', resuldatosEvaluacionRouter);
 
 // evaluaciones
 
