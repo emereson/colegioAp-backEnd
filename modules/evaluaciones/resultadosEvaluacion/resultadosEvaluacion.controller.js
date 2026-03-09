@@ -547,17 +547,21 @@ export const getExamReviewAdmin = catchAsync(async (req, res, next) => {
     }
   });
 
+  const resultadoFinal = resultado.toJSON();
+
+  // 🟢 2. Metemos la evaluación ENTERA dentro del resultado
+  resultadoFinal.evaluacion = examJSON;
+
   return res.status(200).json({
     status: 'Success',
-    resultado: resultado,
-    evaluacion: examJSON,
+    resultado: resultadoFinal,
   });
 });
 
 export const getExamenes = catchAsync(async (req, res, next) => {
   const { year, estudiante } = req.query;
 
-  const estudianteWhere = {};
+  let estudianteWhere = {};
 
   if (estudiante && estudiante.trim().length > 0) {
     estudianteWhere = {
