@@ -460,8 +460,6 @@ export const getExamReviewAdmin = catchAsync(async (req, res, next) => {
   });
   // ================================================================
 
-  console.log(resultado.evaluacion_id);
-
   // 3. Traemos la evaluación filtrando solo las preguntas respondidas
   const evaluacion = await Evaluaciones.findOne({
     where: { id: resultado.evaluacion_id },
